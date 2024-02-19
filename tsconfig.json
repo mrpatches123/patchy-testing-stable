@@ -1,0 +1,32 @@
+{
+	"compilerOptions": {
+		"target": "es2020",
+		"moduleResolution": "node",
+		"module": "es2020",
+		"declaration": false,
+		"noLib": false,
+		"emitDecoratorMetadata": false,
+		"experimentalDecorators": true,
+		"sourceMap": true,
+		"forceConsistentCasingInFileNames": true,
+		"strict": true,
+		"allowUnreachableCode": true,
+		"allowUnusedLabels": true,
+		"noImplicitAny": true,
+		"noImplicitReturns": false,
+		"noImplicitUseStrict": false,
+		"outDir": "scripts/",
+		"rootDir": "src/",
+		"baseUrl": "src/",
+		"listFiles": false,
+		"noEmitHelpers": true
+	},
+	"include": [
+		"src/**/*.ts"
+	],
+	"exclude": [
+		"node_modules/**/*",
+		"scripts/**/*"
+	],
+	"compileOnSave": false
+}
