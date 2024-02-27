@@ -10,3 +10,11 @@ export function fixPlayerScore(player: Player) {
 	if (!player.scoreboardIdentity)
 		player.runCommand('scoreboard players set @s test 0');
 }
+export function iterateObject<T extends Record<string, any>>(obj: T, callback: (key: keyof T, value: T[keyof T], i: number) => void) {
+	let i = 0;
+	const objectPrototype = Object.getPrototypeOf({});
+	for (const key in obj) {
+		if (key in objectPrototype) continue;
+		callback(key, obj[key], i++);
+	}
+}
