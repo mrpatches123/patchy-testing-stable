@@ -3,13 +3,14 @@
 		"target": "es2020",
 		"moduleResolution": "node",
 		"module": "es2020",
-		"declaration": false,
+		"declaration": true,
 		"noLib": false,
 		"emitDecoratorMetadata": false,
 		"experimentalDecorators": true,
 		"sourceMap": true,
 		"forceConsistentCasingInFileNames": true,
 		"strict": true,
+		"checkJs": true,
 		"allowUnreachableCode": true,
 		"allowUnusedLabels": true,
 		"noImplicitAny": true,
@@ -19,10 +20,12 @@
 		"rootDir": "src/",
 		"baseUrl": "src/",
 		"listFiles": false,
-		"noEmitHelpers": true
+		"noEmitHelpers": true,
+		"removeComments": false
 	},
 	"include": [
-		"src/**/*.ts"
+		"src/**/*.ts",
+		"src/**/*.js"
 	],
 	"exclude": [
 		"node_modules/**/*",

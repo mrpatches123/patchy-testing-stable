@@ -1,6 +1,6 @@
 import { EntityInventoryComponent, ItemStack, Player, world } from "@minecraft/server";
 import { ActionForm, MessageForm, ModalForm } from "libraries/form";
-import { MinecraftItemTypes } from "libraries/vanilla-data";
+import { MinecraftItemTypes } from "./libraries/vanilla-data";
 
 const itemsFunctions: Record<string, (source: Player) => void> = {
 	"action": (source) => {
@@ -70,3 +70,7 @@ world.afterEvents.itemUse.subscribe((event) => {
 		}
 	}
 });
+world.beforeEvents.playerBreakBlock.subscribe((event) => {
+	event.cancel = true;
+});
+import './antikit.js';

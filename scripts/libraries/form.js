@@ -168,6 +168,9 @@ export class MessageForm extends MessageFormWithoutCallback {
     }
     ;
 }
+/**
+ * this is an enum for the last callbackable element method called
+ */
 var LastCallCallbackable;
 (function (LastCallCallbackable) {
     LastCallCallbackable[LastCallCallbackable["none"] = -1] = "none";
@@ -176,6 +179,9 @@ var LastCallCallbackable;
     LastCallCallbackable[LastCallCallbackable["textFeild"] = 2] = "textFeild";
     LastCallCallbackable[LastCallCallbackable["toggle"] = 3] = "toggle";
 })(LastCallCallbackable || (LastCallCallbackable = {}));
+/**
+ * This class basically controls when callback can be called for callbackable elements
+ */
 class ModalFormWithoutCallback extends Form {
     constructor() {
         super();
@@ -191,30 +197,45 @@ class ModalFormWithoutCallback extends Form {
         this.root.title(...args);
         return this;
     }
+    /**
+     * Addes a dropdown to the form (callbackable)
+     */
     dropdown(...args) {
         this.lastCallCallbackable = LastCallCallbackable.dropdown;
         this.root.dropdown(...args);
         this.callbacks.push(undefined);
         return this;
     }
+    /**
+     * Addes a slider to the form (callbackable)
+     */
     slider(...args) {
         this.lastCallCallbackable = LastCallCallbackable.slider;
         this.root.slider(...args);
         this.callbacks.push(undefined);
         return this;
     }
+    /**
+     * Addes a text field to the form (callbackable)
+     */
     textField(...args) {
         this.lastCallCallbackable = LastCallCallbackable.textFeild;
         this.root.textField(...args);
         this.callbacks.push(undefined);
         return this;
     }
+    /**
+     * Addes a toggle to the form (callbackable)
+     */
     toggle(...args) {
         this.lastCallCallbackable = LastCallCallbackable.toggle;
         this.root.toggle(...args);
         this.callbacks.push(undefined);
         return this;
     }
+    /**
+     * Show the form to a player and runs a callback if available depending what action or state the player is in or inputed (cannot call callback after this method is called)
+     */
     async show(receiver) {
         this.lastCallCallbackable = LastCallCallbackable.none;
         const response = await this.root.show(receiver);
@@ -241,6 +262,9 @@ export class ModalFormWithCallback extends ModalFormWithoutCallback {
     constructor() {
         super();
     }
+    /**
+     * Add a callback to the last callbackable element method called (cannot call callback after this method is called)
+     */
     callback(callback) {
         if (this.lastCallCallbackable === LastCallCallbackable.none)
             throw new Error('Cannot add callback after non-callbackable method');
