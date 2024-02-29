@@ -1,21 +1,20 @@
 import { ItemStack, world } from "@minecraft/server";
 import { ActionForm, MessageForm, ModalForm } from "libraries/form";
-import { MinecraftItemTypes } from "./libraries/vanilla-data";
 const itemsFunctions = {
     "action": (source) => {
         const form = new ActionForm();
         form.button("test0")
             .callback(() => {
-            console.warn('test0');
-        }).button("test1").callback(() => {
-            console.warn('test1');
-        }).button("nothing").button("test2").callback(() => {
-            console.warn('test2');
-        }).busyCallback(() => {
-            console.warn('busy');
-        }).closeCallback(() => {
-            console.warn('close');
-        }).body('test').title('test').show(source);
+                console.warn('test0');
+            }).button("test1").callback(() => {
+                console.warn('test1');
+            }).button("nothing").button("test2").callback(() => {
+                console.warn('test2');
+            }).busyCallback(() => {
+                console.warn('busy');
+            }).closeCallback(() => {
+                console.warn('close');
+            }).body('test').title('test').show(source);
     },
     "message": (source) => {
         const form = new MessageForm();
@@ -47,23 +46,23 @@ const itemsFunctions = {
 world.afterEvents.itemUse.subscribe((event) => {
     const { source, itemStack } = event;
     switch (itemStack.typeId) {
-        case MinecraftItemTypes.Brush: {
+        case "minecraft:brush" /* MinecraftItemTypes.Brush */: {
             const container = source.getComponent('minecraft:inventory').container;
             for (let i = 0; i < container.size; i++) {
                 const item = container.getItem(i);
                 if (!item)
                     continue;
-                if (item.typeId === MinecraftItemTypes.Stick) {
+                if (item.typeId === "minecraft:stick" /* MinecraftItemTypes.Stick */) {
                     container.setItem(i);
                 }
             }
             Object.entries(itemsFunctions).forEach(([key, value]) => {
-                const item = new ItemStack(MinecraftItemTypes.Stick, 1);
+                const item = new ItemStack("minecraft:stick" /* MinecraftItemTypes.Stick */, 1);
                 item.nameTag = key;
                 container.addItem(item);
             });
         }
-        case MinecraftItemTypes.Stick: {
+        case "minecraft:stick" /* MinecraftItemTypes.Stick */: {
             itemsFunctions[itemStack.nameTag ?? ""]?.(source);
         }
     }
@@ -71,5 +70,3 @@ world.afterEvents.itemUse.subscribe((event) => {
 world.beforeEvents.playerBreakBlock.subscribe((event) => {
     event.cancel = true;
 });
-import './antikit.js';
-//# sourceMappingURL=index.js.map

@@ -7,7 +7,7 @@
 		"noLib": false,
 		"emitDecoratorMetadata": false,
 		"experimentalDecorators": true,
-		"sourceMap": true,
+		"sourceMap": false,
 		"forceConsistentCasingInFileNames": true,
 		"strict": true,
 		"checkJs": true,
@@ -21,7 +21,7 @@
 		"baseUrl": "src/",
 		"listFiles": false,
 		"noEmitHelpers": true,
-		"removeComments": false
+		"removeComments": false,
 	},
 	"include": [
 		"src/**/*.ts",

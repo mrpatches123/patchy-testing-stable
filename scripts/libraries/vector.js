@@ -282,4 +282,3 @@ Vector.up = new _a(0, 1, 0);
  * @readonly
  */
 Vector.zero = new _a(0, 0, 0);
-//# sourceMappingURL=vector.js.map

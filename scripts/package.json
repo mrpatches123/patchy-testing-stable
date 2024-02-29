@@ -1,6 +1,0 @@
-{
-	"type": "module",
-	"dependencies": {
-		"@minecraft/vanilla-data": "^1.20.60"
-	}
-}

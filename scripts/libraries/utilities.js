@@ -19,4 +19,3 @@ export function iterateObject(obj, callback) {
         callback(key, obj[key], i++);
     }
 }
-//# sourceMappingURL=utilities.js.map

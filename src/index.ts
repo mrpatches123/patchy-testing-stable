@@ -73,4 +73,3 @@ world.afterEvents.itemUse.subscribe((event) => {
 world.beforeEvents.playerBreakBlock.subscribe((event) => {
 	event.cancel = true;
 });
-import './antikit.js';

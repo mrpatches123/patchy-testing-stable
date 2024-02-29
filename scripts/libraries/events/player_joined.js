@@ -1,7 +1,7 @@
 import { system, world } from "@minecraft/server";
 import { fixPlayerScore, iterateObject } from "libraries/utilities";
 import { worldInitialize } from "./world_initialize";
-class WorldInitializeEvent {
+class PlayerJoinedEvent {
     constructor() {
         this.currentSubscribeId = 0;
         this.subscriptions = {};
@@ -48,5 +48,4 @@ class WorldInitializeEvent {
         delete this.subscriptions[id];
     }
 }
-export const playerJoined = new WorldInitializeEvent();
-//# sourceMappingURL=player_joined.js.map
+export const playerJoined = new PlayerJoinedEvent();
