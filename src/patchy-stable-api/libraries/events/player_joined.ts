@@ -1,5 +1,5 @@
 import { Player, system, world } from "@minecraft/server";
-import { fixPlayerScore, iterateObject } from "libraries/utilities";
+import { fixPlayerScore, iterateObject } from "../utilities";
 import { worldInitialize } from "./world_initialize";
 class PlayerJoinedEvent {
 	protected currentSubscribeId = 0;

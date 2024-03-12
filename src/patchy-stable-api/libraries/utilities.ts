@@ -24,3 +24,11 @@ export function isDefined<T>(value: T | undefined): value is T {
 export function isVector3(value: any): value is Vector3 {
 	return typeof value.x === 'number' && typeof value.y === 'number' && typeof value.z === 'number';
 }
+export function chunkString(str: string, length: number) {
+	let size = (str.length / length) | 0;
+	const array: string[] = Array(++size);
+	for (let i = 0, offset = 0; i < size; i++, offset += length) {
+		array[i] = str.substr(offset, length);
+	}
+	return array;
+}
