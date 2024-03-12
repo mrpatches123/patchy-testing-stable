@@ -1,9 +1,9 @@
 import { ActionFormData, FormCancelationReason, MessageFormData, ModalFormData } from '@minecraft/server-ui';
 // This class is a base class for All form implementations
 class Form {
-    constructor() {
-        this.lastCallCallbackable = false;
-    }
+    _closeCallback;
+    _busyCallback;
+    lastCallCallbackable = false;
     /**
      * Sets the callback for when the form is closed (cannot call callback after this method is called)
      */
@@ -23,9 +23,10 @@ class Form {
 }
 // This class is a base class for ActionForm and MessageForm
 class ButtonForm extends Form {
+    root;
+    callbacks = [];
     constructor() {
         super();
-        this.callbacks = [];
     }
     /**
      * Show the form to a player and runs a callback if available depending what action or state the player is in or inputed (cannot call callback after this method is called)
@@ -54,11 +55,11 @@ class ButtonForm extends Form {
  * This class basically controls when callback can be called for callbackable elements
  */
 class ActionFormWithoutCallback extends ButtonForm {
+    callbacks = [];
+    root = new ActionFormData();
+    lastCallCallbackable = false;
     constructor() {
         super();
-        this.callbacks = [];
-        this.root = new ActionFormData();
-        this.lastCallCallbackable = false;
     }
     /**
      * Add a button to the form (callbackable)
@@ -110,11 +111,11 @@ export class ActionForm extends ActionFormWithoutCallback {
  * This class basically controls when callback can be called for callbackable elements
  */
 class MessageFormWithoutCallback extends ButtonForm {
+    callbacks = [undefined, undefined];
+    root = new MessageFormData();
+    lastCallCallbackable = -1;
     constructor() {
         super();
-        this.callbacks = [undefined, undefined];
-        this.root = new MessageFormData();
-        this.lastCallCallbackable = -1;
     }
     /**
      * Set the title of the form (cannot call callback after this method is called)
@@ -183,11 +184,11 @@ var LastCallCallbackable;
  * This class basically controls when callback can be called for callbackable elements
  */
 class ModalFormWithoutCallback extends Form {
+    root = new ModalFormData();
+    callbacks = [];
+    lastCallCallbackable = LastCallCallbackable.none;
     constructor() {
         super();
-        this.root = new ModalFormData();
-        this.callbacks = [];
-        this.lastCallCallbackable = LastCallCallbackable.none;
     }
     /**
      * Set the title of the form (cannot call callback after this method is called)

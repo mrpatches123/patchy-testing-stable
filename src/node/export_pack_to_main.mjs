@@ -1,5 +1,12 @@
 import path from 'path';
 import fs from 'fs';
+
+// const worlds = ['security-tree-house'];
+
+
+
+
+
 /**
  * @returns {'behavior_packs' | 'resource_packs'}
  */
@@ -10,7 +17,7 @@ function getPackType() {
 }
 const packType = getPackType();
 const packPath = process.cwd();
-const worldsFolderPath = path.resolve('../../minecraftWorlds');
+const packFolderPathMain = path.resolve(`../../${packType}`);
 function isFolder(path) {
 	// console.log(path);
 	try {
@@ -47,7 +54,7 @@ function copyRecursiveSync(src, dest, excludeCallback, deleteDest = false) {
 				const fileContents = fs.readFileSync(staticSRCPath);
 				fs.writeFileSync(staticDestPath, fileContents);
 			}
-			console.log(staticSRCPath);
+			// console.log(staticSRCPath);
 		});
 	};
 	copyRecursiveSyncInternal(src, srcFolderNameWithDest);
@@ -58,20 +65,21 @@ const packNameHeader = devmanifest.header.name;
 console.log(packHeaderUUID);
 
 
-const excludes = ['.git', '.vscode', 'src', '.gitignore', 'tsconfig.json', 'package.json', 'package-lock.json', 'node_modules'].map(path => '\\' + path);
-const worlds = ['test'];
-const filesToRemove = ['world_behavior_pack_history.json', 'world_resource_pack_history.json'];
-worlds.forEach(world => {
-	let uuidHeader = crypto.randomUUID();
-	let uuidScripts = crypto.randomUUID();
-	let uuidData = crypto.randomUUID();
-	let uuidResources = crypto.randomUUID();
-	let headerVersion = [0, 0, 1];
+const excludes = ['.git', '.VSCodeCounter', '.vscode', 'src', '.gitignore', 'tsconfig.json', 'package.json', 'package-lock.json', 'node_modules'].map(path => '\\' + path);
 
-	const worldPath = path.join(worldsFolderPath, world);
-	console.log(worldPath, isFolder(worldPath));
+// const filesToRemove = ['world_behavior_pack_history.json', 'world_resource_pack_history.json'];
+// worlds.forEach(world => {
+let uuidHeader = crypto.randomUUID();
+let uuidScripts = crypto.randomUUID();
+let uuidData = crypto.randomUUID();
+let uuidResources = crypto.randomUUID();
+let headerVersion = [0, 0, 1];
+
+(() => {
+	const worldPath = packFolderPathMain;
+	// console.log(worldPath, isFolder(worldPath));
 	if (!isFolder(worldPath)) return;
-	const dest = path.join(worldPath, packType);
+	const dest = worldPath;
 	const pathArray = packPath.split(path.sep);
 	const srcfolderName = pathArray[pathArray.length - 1];
 	const srcFolderNameWithDest = path.join(dest, srcfolderName);
@@ -100,15 +108,15 @@ worlds.forEach(world => {
 		}
 	}
 	copyRecursiveSync(packPath, dest, (src, dest, dir, staticSRCPath, relitiveFromSRCPath) => {
-		console.log(relitiveFromSRCPath);
+		// console.log(relitiveFromSRCPath);
 		if (excludes.includes(relitiveFromSRCPath)) return true;
 	}, true);
 	const manifest = JSON.parse(fs.readFileSync(path.join(packPath, 'manifest.json')).toString());
 	// console.warn(manifest);
 	manifest.header.uuid = uuidHeader;
 	manifest.header.version = headerVersion;
-	manifest.header.name = `${packNameHeader} World`;
-	manifest.description = `${headerVersion[0]}.${headerVersion[1]}.${headerVersion[2]}`;
+	manifest.header.name = `${packNameHeader} Main`;
+	manifest.header.description = `${headerVersion[0]}.${headerVersion[1]}.${headerVersion[2]}`;
 	manifest.modules.forEach((module, i) => {
 		switch (module.type) {
 			case 'data':
@@ -123,15 +131,15 @@ worlds.forEach(world => {
 		}
 	});
 	fs.writeFileSync(path.join(srcFolderNameWithDest, 'manifest.json'), JSON.stringify(manifest, null, 4));
-	filesToRemove.forEach(file => {
-		try { fs.rmSync(path.join(worldPath, file)); } catch { }
-	});
-	const worldPacksPath = `world_${packType}.json`;
-	let worldPacks = [];
-	try {
-		worldPacks = JSON.parse(fs.readFileSync(path.join(worldPath, worldPacksPath)).toString());
-	} catch { }
-	worldPacks = worldPacks.filter(pack => pack.pack_id !== packHeaderUUID);
-	if (!worldPacks.some(pack => pack.pack_id === uuidHeader)) worldPacks.push({ pack_id: uuidHeader, version: [0, 0, 0] });
-	fs.writeFileSync(path.join(worldPath, worldPacksPath), JSON.stringify(worldPacks, null, 4));
-});
+	// filesToRemove.forEach(file => {
+	// 	try { fs.rmSync(path.join(worldPath, file)); } catch { }
+	// });
+	// const worldPacksPath = `world_${packType}.json`;
+	// let worldPacks = [];
+	// try {
+	// 	worldPacks = JSON.parse(fs.readFileSync(path.join(worldPath, worldPacksPath)).toString());
+	// } catch { }
+	// worldPacks = worldPacks.filter(pack => pack.pack_id !== packHeaderUUID);
+	// if (!worldPacks.some(pack => pack.pack_id === uuidHeader)) worldPacks.push({ pack_id: uuidHeader, version: [0, 0, 0] });
+	// fs.writeFileSync(path.join(worldPath, worldPacksPath), JSON.stringify(worldPacks, null, 4));
+})();

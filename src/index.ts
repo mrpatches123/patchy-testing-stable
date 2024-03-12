@@ -1,6 +1,7 @@
-import { EntityInventoryComponent, ItemStack, Player, world } from "@minecraft/server";
+import { EntityInventoryComponent, ItemStack, Player, system, world } from "@minecraft/server";
 import { ActionForm, MessageForm, ModalForm } from "libraries/form";
 import { MinecraftItemTypes } from "./libraries/vanilla-data";
+import { storage } from "libraries/properties";
 
 const itemsFunctions: Record<string, (source: Player) => void> = {
 	"action": (source) => {
@@ -72,4 +73,69 @@ world.afterEvents.itemUse.subscribe((event) => {
 });
 world.beforeEvents.playerBreakBlock.subscribe((event) => {
 	event.cancel = true;
+});
+try {
+	world.scoreboard.addObjective("test");
+} catch (e) {
+
+}
+system.afterEvents.scriptEventReceive.subscribe((event) => {
+	const { id, message, sourceEntity } = event;
+	if (id !== "p:test") return;
+	if (!(sourceEntity instanceof Player)) return;
+	const worldStorage = storage.get(world);
+	const playerStorage = storage.get(sourceEntity);
+
+	switch (message) {
+		case "set": {
+			playerStorage.scores.test = 1;
+
+			playerStorage.booleans.test1 = true;
+			playerStorage.numbers.test2 = 5;
+			playerStorage.vector3s.test3 = { "x": 1, "y": 2, "z": 3 };
+			playerStorage.strings.test4 = "dwlwwldwl;wdldw";
+			break;
+		}
+		case "get": {
+			sourceEntity.sendMessage(JSON.stringify({
+				score: playerStorage.scores.test ?? "null",
+				bool: playerStorage.booleans.test1 ?? "null",
+				number: playerStorage.numbers.test2 ?? "null",
+				vector: playerStorage.vector3s.test3 ?? "null",
+				string: playerStorage.strings.test4 ?? "null",
+			}, null, 2));
+			break;
+		}
+		case "type": {
+			try {
+				playerStorage.booleans.test2;
+			} catch (e: any) {
+				console.warn(e, e.stack);
+			}
+			try {
+				playerStorage.numbers.test1;
+			} catch (e: any) {
+				console.warn(e, e.stack);
+			}
+			try {
+				playerStorage.strings.test3;
+			} catch (e: any) {
+				console.warn(e, e.stack);
+			}
+			try {
+				playerStorage.vector3s.test4;
+			} catch (e: any) {
+				console.warn(e, e.stack);
+			}
+			break;
+		}
+		case "clear": {
+			playerStorage.clearAll();
+			break;
+		}
+		case "print": {
+			sourceEntity.sendMessage(JSON.stringify(playerStorage, null, 4));
+			break;
+		}
+	}
 });

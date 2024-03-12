@@ -19,3 +19,9 @@ export function iterateObject(obj, callback) {
         callback(key, obj[key], i++);
     }
 }
+export function isDefined(value) {
+    return value !== undefined && value !== null && typeof value !== 'number' || Number.isFinite(value);
+}
+export function isVector3(value) {
+    return typeof value.x === 'number' && typeof value.y === 'number' && typeof value.z === 'number';
+}

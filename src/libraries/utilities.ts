@@ -1,4 +1,4 @@
-import { world, Player } from "@minecraft/server";
+import { world, Player, Vector3 } from "@minecraft/server";
 
 export const overworld = world.getDimension("overworld");
 export const nether = world.getDimension("nether");
@@ -17,4 +17,10 @@ export function iterateObject<T extends Record<string, any>>(obj: T, callback: (
 		if (key in objectPrototype) continue;
 		callback(key, obj[key], i++);
 	}
+}
+export function isDefined<T>(value: T | undefined): value is T {
+	return value !== undefined && value !== null && typeof value !== 'number' || Number.isFinite(value);
+}
+export function isVector3(value: any): value is Vector3 {
+	return typeof value.x === 'number' && typeof value.y === 'number' && typeof value.z === 'number';
 }

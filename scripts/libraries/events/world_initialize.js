@@ -1,11 +1,10 @@
 import { system, world } from "@minecraft/server";
 import { iterateObject } from "libraries/utilities";
 class WorldInitializeEvent {
-    constructor() {
-        this.currentSubscribeId = 0;
-        this.subscriptions = {};
-        this.currentSubscribes = 0;
-    }
+    currentSubscribeId = 0;
+    subscriptions = {};
+    currentSubscribes = 0;
+    runId;
     subscribe(callback) {
         const subscribeId = this.currentSubscribeId++;
         this.subscriptions[subscribeId] = callback;

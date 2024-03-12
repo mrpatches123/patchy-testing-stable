@@ -2,12 +2,11 @@ import { system, world } from "@minecraft/server";
 import { fixPlayerScore, iterateObject } from "libraries/utilities";
 import { worldInitialize } from "./world_initialize";
 class PlayerJoinedEvent {
-    constructor() {
-        this.currentSubscribeId = 0;
-        this.subscriptions = {};
-        this.currentSubscribes = 0;
-        this.loads = {};
-    }
+    currentSubscribeId = 0;
+    subscriptions = {};
+    currentSubscribes = 0;
+    runId;
+    loads = {};
     subscribe(callback) {
         const subscribeId = this.currentSubscribeId++;
         this.subscriptions[subscribeId] = callback;
