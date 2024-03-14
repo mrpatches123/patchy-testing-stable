@@ -352,6 +352,22 @@ class WorldStorageManager extends DynamicPropertyManager {
 		this.scoresStorage[key][dummyName].gotten = true;
 		delete this.scoresStorage[key][dummyName].value;
 	}
+	get scores(): Record<string, Record<string, number | undefined>> {
+		const thisEntityStorage = this;
+		return new Proxy({}, {
+			get: (target, key, receiver) => {
+				return new Proxy({}, {
+					set: (target, dummyName, value, receiver) => {
+						thisEntityStorage.setScore(key as string, dummyName as string, value);
+						return Reflect.set(target, key, value, receiver);
+					},
+					get: (target, dummyName, receiver) => {
+						return thisEntityStorage.getScore(key as string, dummyName as string);
+					}
+				});
+			}
+		});
+	}
 };
 
 export const storage = new Storage();
