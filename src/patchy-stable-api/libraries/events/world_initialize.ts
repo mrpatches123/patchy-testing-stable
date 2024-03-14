@@ -1,6 +1,6 @@
 import { system, world } from "@minecraft/server";
 import { iterateObject } from "../utilities";
-class WorldInitializeEvent {
+export class WorldInitializeEvent {
 	protected currentSubscribeId = 0;
 	protected subscriptions: Record<number, (() => void)> = {};
 	protected currentSubscribes = 0;

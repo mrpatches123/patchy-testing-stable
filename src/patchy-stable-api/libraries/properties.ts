@@ -1,5 +1,6 @@
 import { Entity, Player, Scoreboard, ScoreboardObjective, Vector3, World, world } from "@minecraft/server";
 import { isDefined, isVector3 } from "./utilities";
+import { StorageChangedType, customEvents } from "./events";
 export class Storage {
 	protected managers: Record<string, EntityStorageManager | WorldStorageManager> = { 'world': new WorldStorageManager(world) };
 	get(): WorldStorageManager;
@@ -12,6 +13,18 @@ export class Storage {
 		const { id } = target;
 		this.managers[id] ??= new EntityStorageManager(target);
 		return this.managers[id] as any;
+	}
+	constructor() {
+		world.afterEvents.playerLeave.subscribe(({ playerId }) => {
+			delete this.managers[playerId];
+		});
+		world.afterEvents.entityRemove.subscribe(({ removedEntityId }) => {
+			delete this.managers[removedEntityId];
+		});
+		world.afterEvents.entityDie.subscribe(({ deadEntity }) => {
+			if (deadEntity instanceof Player) return;
+			delete this.managers[deadEntity.id];
+		});
 	}
 }
 enum DynamicPropertyTypes {
@@ -36,9 +49,13 @@ class DynamicPropertyManager {
 	setString(key: string, value?: string) {
 		if (typeof key !== 'string') throw new Error('key is not of type string');
 		if (isDefined(value) && typeof value !== 'string') throw new Error('value is defined and is not of type string');
-		if (!isDefined(value)) return this.removeString(key);
 		const { type = DynamicPropertyTypes.string, gotten = false } = this.dynamicProperties[key] ?? {};
 		if (type !== DynamicPropertyTypes.string) throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
+		if (!isDefined(value)) return this.removeString(key);
+		let cancel = false;
+		cancel = customEvents.stringDynamicPropertyChanged.runEvent(this.root, key, this.getString(key), value).cancel;
+		cancel = customEvents.storageChanged.runEvent(this.root, key, StorageChangedType.String, this.getString(key), value).cancel;
+		if (cancel) return;
 		this.dynamicProperties[key] ??= {};
 		this.dynamicProperties[key].type = DynamicPropertyTypes.string;
 		this.dynamicProperties[key].value = value;
@@ -55,14 +72,18 @@ class DynamicPropertyManager {
 			this.dynamicProperties[key].value = this.root.getDynamicProperty(key) as string;
 			this.dynamicProperties[key].type = DynamicPropertyTypes.string;
 		}
-		return this.dynamicProperties[key]?.value;
+		return this.dynamicProperties[key]?.value as string | undefined;
 	}
 	setNumber(key: string, value?: number) {
 		if (typeof key !== 'string') throw new Error('key is not of type string');
 		if (isDefined(value) && typeof value !== 'number') throw new Error('value is defined and is not of type number');
-		if (!isDefined(value)) return this.removeNumber(key);
 		const { type = DynamicPropertyTypes.number, gotten = false } = this.dynamicProperties[key] ?? {};
 		if (type !== DynamicPropertyTypes.number) throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
+		if (!isDefined(value)) return this.removeNumber(key);
+		let cancel = false;
+		cancel = customEvents.numberDynamicPropertyChanged.runEvent(this.root, key, this.getNumber(key), value).cancel;
+		cancel = customEvents.storageChanged.runEvent(this.root, key, StorageChangedType.Number, this.getNumber(key), value).cancel;
+		if (cancel) return;
 		this.dynamicProperties[key] ??= {};
 		this.dynamicProperties[key].type = DynamicPropertyTypes.number;
 		this.dynamicProperties[key].value = value;
@@ -80,14 +101,18 @@ class DynamicPropertyManager {
 			this.dynamicProperties[key].value = this.root.getDynamicProperty(key) as number;
 			this.dynamicProperties[key].type = DynamicPropertyTypes.number;
 		}
-		return this.dynamicProperties[key]?.value;
+		return this.dynamicProperties[key]?.value as number | undefined;
 	}
 	setBoolean(key: string, value?: boolean) {
 		if (typeof key !== 'string') throw new Error('key is not of type string');
 		if (isDefined(value) && typeof value !== 'boolean') throw new Error('value is defined and is not of type boolean');
-		if (!isDefined(value)) return this.removeBoolean(key);
 		const { type = DynamicPropertyTypes.boolean, gotten = false } = this.dynamicProperties[key] ?? {};
 		if (type !== DynamicPropertyTypes.boolean) throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
+		if (!isDefined(value)) return this.removeBoolean(key);
+		let cancel = false;
+		cancel = customEvents.booleanDynamicPropertyChanged.runEvent(this.root, key, this.getBoolean(key), value).cancel;
+		cancel = customEvents.storageChanged.runEvent(this.root, key, StorageChangedType.Boolean, this.getBoolean(key), value).cancel;
+		if (cancel) return;
 		this.dynamicProperties[key] ??= {};
 		this.dynamicProperties[key].type = DynamicPropertyTypes.boolean;
 		this.dynamicProperties[key].value = value;
@@ -104,19 +129,23 @@ class DynamicPropertyManager {
 			this.dynamicProperties[key].value = this.root.getDynamicProperty(key) as boolean;
 			this.dynamicProperties[key].type = DynamicPropertyTypes.boolean;
 		}
-		return this.dynamicProperties[key]?.value;
+		return this.dynamicProperties[key]?.value as boolean | undefined;
 	}
 	setVector3(key: string, value?: Vector3) {
 		if (typeof key !== 'string') throw new Error('key is not of type string');
 		if (isDefined(value) && !(isVector3(value))) throw new Error('value is defined and is not of type Vector3');
-		if (!isDefined(value)) return this.removeVector3(key);
 		const { type = DynamicPropertyTypes.vector3, gotten = false } = this.dynamicProperties[key] ?? {};
 		if (type !== DynamicPropertyTypes.vector3) throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
+		if (!isDefined(value)) return this.removeVector3(key);
+		let cancel = false;
+		cancel = customEvents.vector3DynamicPropertyChanged.runEvent(this.root, key, this.getVector3(key), value).cancel;
+		cancel = customEvents.storageChanged.runEvent(this.root, key, StorageChangedType.Vector3, this.getVector3(key), value).cancel;
+		if (cancel) return;
 		this.dynamicProperties[key] ??= {};
 		this.dynamicProperties[key].type = DynamicPropertyTypes.vector3;
 		this.dynamicProperties[key].value = value;
 		this.dynamicProperties[key].gotten = true;
-		this.root.setDynamicProperty(key, value);
+		this.root.setDynamicProperty(key, value) as Vector3 | undefined;
 	}
 	getVector3(key: string) {
 		if (typeof key !== 'string') throw new Error('key is not of type string');
@@ -128,12 +157,16 @@ class DynamicPropertyManager {
 			this.dynamicProperties[key].value = this.root.getDynamicProperty(key) as Vector3;
 			this.dynamicProperties[key].type = DynamicPropertyTypes.vector3;
 		}
-		return this.dynamicProperties[key]?.value;
+		return this.dynamicProperties[key]?.value as Vector3 | undefined;
 	}
 	removeString(key: string) {
 		if (typeof key !== 'string') throw new Error('key is not of type string');
 		const { type = DynamicPropertyTypes.string, gotten = false } = this.dynamicProperties[key] ?? {};
 		if (type !== DynamicPropertyTypes.string) throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
+		let cancel = false;
+		cancel = customEvents.stringDynamicPropertyChanged.runEvent(this.root, key, this.getString(key), undefined).cancel;
+		cancel = customEvents.storageChanged.runEvent(this.root, key, StorageChangedType.String, this.getString(key), undefined).cancel;
+		if (cancel) return;
 		this.root.setDynamicProperty(key);
 		this.dynamicProperties[key] ??= {};
 		this.dynamicProperties[key].type = DynamicPropertyTypes.string;
@@ -145,6 +178,10 @@ class DynamicPropertyManager {
 		if (typeof key !== 'string') throw new Error('key is not of type string');
 		const { type = DynamicPropertyTypes.number, gotten = false } = this.dynamicProperties[key] ?? {};
 		if (type !== DynamicPropertyTypes.number) throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
+		let cancel = false;
+		cancel = customEvents.numberDynamicPropertyChanged.runEvent(this.root, key, this.getNumber(key), undefined).cancel;
+		cancel = customEvents.storageChanged.runEvent(this.root, key, StorageChangedType.Number, this.getNumber(key), undefined).cancel;
+		if (cancel) return;
 		this.root.setDynamicProperty(key);
 		this.dynamicProperties[key] ??= {};
 		this.dynamicProperties[key].type = DynamicPropertyTypes.number;
@@ -155,6 +192,10 @@ class DynamicPropertyManager {
 		if (typeof key !== 'string') throw new Error('key is not of type string');
 		const { type = DynamicPropertyTypes.boolean, gotten = false } = this.dynamicProperties[key] ?? {};
 		if (type !== DynamicPropertyTypes.boolean) throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
+		let cancel = false;
+		cancel = customEvents.booleanDynamicPropertyChanged.runEvent(this.root, key, this.getBoolean(key), undefined).cancel;
+		cancel = customEvents.storageChanged.runEvent(this.root, key, StorageChangedType.Boolean, this.getBoolean(key), undefined).cancel;
+		if (cancel) return;
 		this.root.setDynamicProperty(key);
 		this.dynamicProperties[key] ??= {};
 		this.dynamicProperties[key].type = DynamicPropertyTypes.boolean;
@@ -165,13 +206,51 @@ class DynamicPropertyManager {
 		if (typeof key !== 'string') throw new Error('key is not of type string');
 		const { type = DynamicPropertyTypes.vector3, gotten = false } = this.dynamicProperties[key] ?? {};
 		if (type !== DynamicPropertyTypes.vector3) throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
+		let cancel = false;
+		cancel = customEvents.vector3DynamicPropertyChanged.runEvent(this.root, key, this.getVector3(key), undefined).cancel;
+		cancel = customEvents.storageChanged.runEvent(this.root, key, StorageChangedType.Vector3, this.getVector3(key), undefined).cancel;
+		if (cancel) return;
 		this.root.setDynamicProperty(key);
 		this.dynamicProperties[key] ??= {};
 		this.dynamicProperties[key].type = DynamicPropertyTypes.vector3;
 		this.dynamicProperties[key].gotten = true;
 		delete this.dynamicProperties[key].value;
 	}
+	/**
+	 * runs storageChanged event for all keys
+	 */
 	clearAllDynamicProperties() {
+		let cancel = false;
+		this.root.getDynamicPropertyIds().forEach(key => {
+			let previousValue: number | boolean | string | Vector3 | undefined;
+			let type: StorageChangedType = StorageChangedType.All;
+			switch (this.dynamicProperties[key]?.type) {
+				case DynamicPropertyTypes.string:
+					previousValue = this.getString(key);
+					cancel = customEvents.stringDynamicPropertyChanged.runEvent(this.root, key, previousValue, undefined).cancel;
+					type = StorageChangedType.String;
+					break;
+				case DynamicPropertyTypes.number:
+					previousValue = this.getNumber(key);
+					cancel = customEvents.numberDynamicPropertyChanged.runEvent(this.root, key, previousValue, undefined).cancel;
+					type = StorageChangedType.Number;
+					break;
+				case DynamicPropertyTypes.boolean:
+					previousValue = this.getBoolean(key);
+					cancel = customEvents.booleanDynamicPropertyChanged.runEvent(this.root, key, previousValue, undefined).cancel;
+					type = StorageChangedType.Boolean;
+					break;
+				case DynamicPropertyTypes.vector3:
+					previousValue = this.getVector3(key);
+					cancel = customEvents.vector3DynamicPropertyChanged.runEvent(this.root, key, previousValue, undefined).cancel;
+					type = StorageChangedType.Vector3;
+					break;
+				default:
+					previousValue = undefined;
+			}
+			cancel = customEvents.storageChanged.runEvent(this.root, key, type, previousValue, undefined).cancel;
+		});
+		if (cancel) return;
 		this.root.clearDynamicProperties();
 		this.dynamicProperties = {};
 	}
@@ -351,6 +430,22 @@ class WorldStorageManager extends DynamicPropertyManager {
 		this.scoresStorage[key] ??= {};
 		this.scoresStorage[key][dummyName].gotten = true;
 		delete this.scoresStorage[key][dummyName].value;
+	}
+	get scores(): Record<string, Record<string, number | undefined>> {
+		const thisEntityStorage = this;
+		return new Proxy({}, {
+			get: (target, key, receiver) => {
+				return new Proxy({}, {
+					set: (target, dummyName, value, receiver) => {
+						thisEntityStorage.setScore(key as string, dummyName as string, value);
+						return Reflect.set(target, key, value, receiver);
+					},
+					get: (target, dummyName, receiver) => {
+						return thisEntityStorage.getScore(key as string, dummyName as string);
+					}
+				});
+			}
+		});
 	}
 };
 

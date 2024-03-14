@@ -83,7 +83,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 	const { id, message, sourceEntity } = event;
 	if (id !== "p:test") return;
 	if (!(sourceEntity instanceof Player)) return;
-	const worldStorage = storage.get(world);
+	const worldStorage = storage.get();
 	const playerStorage = storage.get(sourceEntity);
 
 	switch (message) {
@@ -94,6 +94,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 			playerStorage.numbers.test2 = 5;
 			playerStorage.vector3s.test3 = { "x": 1, "y": 2, "z": 3 };
 			playerStorage.strings.test4 = "dwlwwldwl;wdldw";
+			worldStorage.scores.test.cool = 1;
 			break;
 		}
 		case "get": {
@@ -103,6 +104,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 				number: playerStorage.numbers.test2 ?? "null",
 				vector: playerStorage.vector3s.test3 ?? "null",
 				string: playerStorage.strings.test4 ?? "null",
+				worldScore: worldStorage.scores.test.cool ?? "null"
 			}, null, 2));
 			break;
 		}
