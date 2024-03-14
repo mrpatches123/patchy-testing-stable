@@ -1,5 +1,7 @@
 import { Player } from '@minecraft/server';
-import { ActionFormData, FormCancelationReason, MessageFormData, ModalFormData } from '@minecraft/server-ui';
+import { ActionFormData, ActionFormResponse, FormCancelationReason, MessageFormData, MessageFormResponse, ModalFormData, ModalFormResponse } from '@minecraft/server-ui';
+import { sleep } from './utilities';
+
 // This class is a base class for All form implementations
 class Form {
 	protected _closeCallback?: (receiver: Player) => void;
@@ -49,6 +51,30 @@ class ButtonForm extends Form {
 		} else {
 			this.callbacks[selection]?.(receiver, selection);
 		}
+		return response;
+	}
+	async showAwaitNotBusy(receiver: Player) {
+		this.lastCallCallbackable = false;
+		let response: ActionFormResponse | MessageFormResponse;
+		while (true) {
+			if (!receiver || !receiver.isValid()) return;
+			response = await this.root.show(receiver);
+			if (response.cancelationReason !== FormCancelationReason.UserBusy) {
+				break;
+			}
+			await sleep();
+		}
+		const { selection = -1, canceled, cancelationReason } = response;
+		if (canceled) {
+			switch (cancelationReason) {
+				case FormCancelationReason.UserClosed:
+					this._closeCallback?.(receiver);
+					break;
+			}
+		} else {
+			this.callbacks[selection]?.(receiver, selection);
+		}
+		return response;
 		return response;
 	}
 }
@@ -243,6 +269,31 @@ class ModalFormWithoutCallback extends Form {
 				case FormCancelationReason.UserBusy:
 					this._busyCallback?.(receiver);
 					break;
+				case FormCancelationReason.UserClosed:
+					this._closeCallback?.(receiver);
+					break;
+			}
+		} else {
+			this.callbacks.forEach((callback, i) => {
+				callback?.(receiver, formValues[i], i);
+			});
+		}
+		return response;
+	}
+	async showAwaitNotBusy(receiver: Player) {
+		this.lastCallCallbackable = LastCallCallbackable.none;
+		let response: ModalFormResponse;
+		while (true) {
+			if (!receiver || !receiver.isValid()) return;
+			response = await this.root.show(receiver);
+			if (response.cancelationReason !== FormCancelationReason.UserBusy) {
+				break;
+			}
+			await sleep();
+		}
+		const { canceled, cancelationReason, formValues = [] } = response;
+		if (canceled) {
+			switch (cancelationReason) {
 				case FormCancelationReason.UserClosed:
 					this._closeCallback?.(receiver);
 					break;

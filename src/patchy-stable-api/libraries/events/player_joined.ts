@@ -7,7 +7,7 @@ class PlayerJoinedEvent {
 	protected currentSubscribes = 0;
 	protected runId: number | undefined;
 	protected loads: Record<string, boolean> = {};
-	subscribe(callback: () => void): number {
+	subscribe(callback: ((data: { player: Player; }) => void)): number {
 		const subscribeId = this.currentSubscribeId++;
 		this.subscriptions[subscribeId] = callback;
 		this.currentSubscribes++;
