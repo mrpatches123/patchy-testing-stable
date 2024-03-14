@@ -22,6 +22,7 @@ export class Storage {
 			delete this.managers[removedEntityId];
 		});
 		world.afterEvents.entityDie.subscribe(({ deadEntity }) => {
+			if (deadEntity instanceof Player) return;
 			delete this.managers[deadEntity.id];
 		});
 	}
