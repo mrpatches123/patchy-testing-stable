@@ -1,7 +1,7 @@
 import { Player, system, world } from "@minecraft/server";
 import { fixPlayerScore, iterateObject } from "../utilities";
 import { worldInitialize } from "./world_initialize";
-class PlayerJoinedEvent {
+export class PlayerJoinedEvent {
 	protected currentSubscribeId = 0;
 	protected subscriptions: Record<number, ((data: { player: Player; }) => void)> = {};
 	protected currentSubscribes = 0;
