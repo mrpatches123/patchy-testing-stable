@@ -23,6 +23,7 @@ export class WorldInitializeEvent {
 				if (!successCount) return;
 				console.warn('world_initialised');
 				iterateObject(thisWorldInit.subscriptions, (id, callback) => callback());
+				system.clearRun(thisWorldInit.runId!);
 			} catch (error: any) {
 				console.warn(error, error.stack);
 			}

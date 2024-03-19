@@ -1,4 +1,4 @@
-import { world, Player, Vector3, system } from "@minecraft/server";
+import { world, Player, Vector3, system, ItemStack, EntityInventoryComponent, Dimension, Entity } from "@minecraft/server";
 
 export const overworld = world.getDimension("overworld");
 export const nether = world.getDimension("nether");
@@ -166,5 +166,98 @@ export function parseCommand(message: string, prefix: string) {
 }
 export async function sleep(ticks?: number): Promise<undefined> {
 	return new Promise((resolve) => system.runTimeout(() => resolve(undefined), ticks));
+}
 
+export function cartesianToCircular(vector: Vector3, center: Vector3 = { x: 0, y: 0, z: 0 }) {
+	const { x, z } = vector;
+	const { x: xc, z: zc } = center;
+	const xd = x - xc;
+	const zd = z - zc;
+	const r = Math.sqrt((xd) ** 2 + (zd) ** 2);
+	let thetaT;
+	if (zd >= 0) {
+		thetaT = Math.atan2(zd, xd);
+	} else {
+		thetaT = 2 * Math.PI + Math.atan2(zd, xd);
+	}
+	return ({ theta: thetaT, r, x, z });
+}
+const PI2 = 2 * Math.PI;
+export function differenceRadians(theta1: number, theta2: number) {
+	const t1 = theta1 % (PI2);
+	const t2 = theta2 % (PI2);
+	let r1 = t1 - t2;
+	let r2 = t1 - (t2 + PI2);
+	return (Math.abs(r1) > Math.abs(r2)) ? r2 : r1;
+
+}
+export function shuffle<T>(array: T[]): T[] {
+	let currentIndex = array.length, randomIndex;
+
+	// While there remain elements to shuffle.
+	while (currentIndex > 0) {
+
+		// Pick a remaining element.
+		randomIndex = Math.floor(Math.random() * currentIndex);
+		currentIndex--;
+
+		// And swap it with the current element.
+		[array[currentIndex], array[randomIndex]] = [
+			array[randomIndex], array[currentIndex]];
+	}
+
+	return array;
+}
+export function giveItem(player: Player, item: ItemStack) {
+	const container = (player.getComponent("minecraft:inventory") as EntityInventoryComponent).container!;
+	const itemRemainder = container.addItem(item);
+	if (!itemRemainder) return;
+	player.dimension.spawnItem(itemRemainder, player.location);
+}
+export function sendMessageMessageToOtherPlayers(excludePlayers: Player[], message: Parameters<Player['sendMessage']>[0]) {
+	world.getAllPlayers().forEach((player) => {
+		if (excludePlayers.some(p => p.id === player.id)) return;
+		player.sendMessage(message);
+	});
+};
+/**
+ * Entity may not be loaded once 
+ */
+export async function spawnEntityAsync(dimension: Dimension, typeId: string, location: Vector3, callback?: (entity: Entity) => void, tickingArea: boolean = true): Promise<Entity> {
+	let entity: Entity | undefined;
+	try {
+		try {
+			entity = dimension.spawnEntity(typeId, location);
+		} catch (error: any) {
+			console.warn('ingore', error, error.stack);
+		}
+		let tickAreaCreated = false;
+		console.warn(entity?.isValid() ?? "");
+		entity = ((entity && !entity.isValid()) ? entity : await new Promise(async (resolve) => {
+			const { x, y, z } = location;
+			if (tickingArea) {
+				tickAreaCreated = true;
+				await dimension.runCommandAsync(`tickingarea add ${x} ${y} ${z} ${x} ${y} ${z} spawnEntityAsyncTick`);
+			}
+			const runId = system.runInterval(async () => {
+				try {
+					entity = (!entity) ? dimension.spawnEntity(typeId, location) : entity;
+					if (!entity) return;
+					if (!entity.isValid()) return;
+					system.clearRun(runId);
+
+					resolve(entity);
+				} catch (error: any) {
+					console.warn('ingore', error, error.stack);
+				}
+			});
+		}))!;
+
+		callback?.(entity);
+		if (tickAreaCreated) dimension.runCommandAsync(`tickingarea remove spawnEntityAsyncTick`);
+
+	} catch (error: any) {
+		console.warn('ingore', error, error.stack);
+	}
+	return entity!;
 }
