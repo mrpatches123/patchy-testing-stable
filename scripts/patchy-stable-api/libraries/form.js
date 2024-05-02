@@ -1,12 +1,30 @@
+import { system } from '@minecraft/server';
 import { ActionFormData, FormCancelationReason, MessageFormData, ModalFormData } from '@minecraft/server-ui';
-import { sleep } from './utilities';
+/**
+ * @param {number | undefined} ticks
+ * @returns {Promise<undefined>}
+ */
+async function sleep(ticks) {
+    return new Promise((resolve) => system.runTimeout(() => resolve(undefined), ticks));
+}
 // This class is a base class for All form implementations
 class Form {
+    /**
+     * @type {(receiver: Player) => void | undefined}
+     */
     _closeCallback;
+    /**
+     * @type {(receiver: Player) => void | undefined}
+     */
     _busyCallback;
+    /**
+     * @type {boolean | -1 | 0 | 1 | 2 | 3}
+     */
     lastCallCallbackable = false;
     /**
-     * Sets the callback for when the form is closed (cannot call callback after this method is called)
+     * Sets the callback for when the user closes the form (cannot call callback after this method is called)
+     * @param {(receiver: Player) => void} callback
+     * @returns {this}
      */
     closeCallback(callback) {
         this.lastCallCallbackable = false;
@@ -15,6 +33,8 @@ class Form {
     }
     /**
      * Sets the callback for when the user is busy (cannot call callback after this method is called)
+     * @param {(receiver: Player) => void} callback
+     * @returns {this}
      */
     busyCallback(callback) {
         this.lastCallCallbackable = false;
@@ -24,33 +44,53 @@ class Form {
 }
 // This class is a base class for ActionForm and MessageForm
 class ButtonForm extends Form {
+    /**
+     * @type {ActionFormData | MessageFormData}
+     */
     root;
+    /**
+     * Sets the title of the form (cannot call callback after this method is called)
+     * @type {(((receiver: Player, i: number) => void) | undefined)[]}
+     */
     callbacks = [];
     constructor() {
         super();
     }
     /**
      * Show the form to a player and runs a callback if available depending what action or state the player is in or inputed (cannot call callback after this method is called)
+     * @param {Player} receiver
+     * @returns {Promise<ActionFormResponse | MessageFormResponse>}
      */
     async show(receiver) {
-        this.lastCallCallbackable = false;
-        const response = await this.root.show(receiver);
-        const { selection = -1, canceled, cancelationReason } = response;
-        if (canceled) {
-            switch (cancelationReason) {
-                case FormCancelationReason.UserBusy:
-                    this._busyCallback?.(receiver);
-                    break;
-                case FormCancelationReason.UserClosed:
-                    this._closeCallback?.(receiver);
-                    break;
+        try {
+            this.lastCallCallbackable = false;
+            const response = await this.root.show(receiver);
+            const { selection = -1, canceled, cancelationReason } = response;
+            if (canceled) {
+                switch (cancelationReason) {
+                    case FormCancelationReason.UserBusy:
+                        this._busyCallback?.(receiver);
+                        break;
+                    case FormCancelationReason.UserClosed:
+                        this._closeCallback?.(receiver);
+                        break;
+                }
             }
+            else {
+                this.callbacks[selection]?.(receiver, selection);
+            }
+            return response;
         }
-        else {
-            this.callbacks[selection]?.(receiver, selection);
+        catch (error) {
+            console.warn(error.stack);
+            throw error;
         }
-        return response;
     }
+    /**
+     * Show the form to a player and runs a callback if available depending what action or state the player is in or inputed (cannot call callback after this method is called)
+     * @param {Player} receiver
+     * @returns {Promise<ActionFormResponse | MessageFormResponse>}
+     */
     async showAwaitNotBusy(receiver) {
         this.lastCallCallbackable = false;
         let response;
@@ -75,21 +115,31 @@ class ButtonForm extends Form {
             this.callbacks[selection]?.(receiver, selection);
         }
         return response;
-        return response;
     }
 }
 /**
  * This class basically controls when callback can be called for callbackable elements
  */
 class ActionFormWithoutCallback extends ButtonForm {
+    /**
+     * @type {(((receiver: Player, i: number) => void) | undefined)[]}
+     */
     callbacks = [];
+    /**
+     * @type {ActionFormData}
+     */
     root = new ActionFormData();
+    /**
+     * @type {boolean}
+     */
     lastCallCallbackable = false;
     constructor() {
         super();
     }
     /**
      * Add a button to the form (callbackable)
+     * @param {...Parameters<ActionFormData['button']>} args
+     * @returns {ActionForm}
      */
     button(...args) {
         this.root.button(...args);
@@ -99,6 +149,8 @@ class ActionFormWithoutCallback extends ButtonForm {
     }
     /**
      * Set the title of the form (cannot call callback after this method is called)
+     * @param {...Parameters<ActionFormData['title']>} args
+     * @returns {this}
      */
     title(...args) {
         this.lastCallCallbackable = false;
@@ -107,6 +159,8 @@ class ActionFormWithoutCallback extends ButtonForm {
     }
     /**
      * Sets the body of the form (cannot call callback after this method is called)
+     * @param {...Parameters<ActionFormData['body']>} args
+     * @returns {this}
      */
     body(...args) {
         this.lastCallCallbackable = false;
@@ -123,8 +177,9 @@ export class ActionForm extends ActionFormWithoutCallback {
         super();
     }
     /**
- * A form that implements MessageFormData with callbacks for buttons, closing, and user busy that can be shown to a player with a title, body, and two buttons (callbackable)
- */
+     * A form that implements MessageFormData with callbacks for buttons, closing, and user busy that can be shown to a player with a title, body, and two buttons (callbackable)
+     * @param {(receiver: Player, i: number) => void} callback
+     */
     callback(callback) {
         if (!this.lastCallCallbackable)
             throw new Error('Cannot add callback after non-callbackable method');
@@ -138,14 +193,25 @@ export class ActionForm extends ActionFormWithoutCallback {
  * This class basically controls when callback can be called for callbackable elements
  */
 class MessageFormWithoutCallback extends ButtonForm {
+    /**
+     * @type {[((receiver: Player, i: number) => void) | undefined, ((receiver: Player, i: number) => void) | undefined]}
+     */
     callbacks = [undefined, undefined];
+    /**
+     * @type {MessageFormData}
+     */
     root = new MessageFormData();
+    /**
+     * @type {-1 | 0 | 1}
+     */
     lastCallCallbackable = -1;
     constructor() {
         super();
     }
     /**
      * Set the title of the form (cannot call callback after this method is called)
+     * @param {...Parameters<MessageFormData['title']>} args
+     * @returns {this}
      */
     title(...args) {
         this.lastCallCallbackable = -1;
@@ -154,6 +220,8 @@ class MessageFormWithoutCallback extends ButtonForm {
     }
     /**
      * Sets the body of the form (cannot call callback after this method is called)
+     * @param {...Parameters<MessageFormData['body']>} args
+     * @returns {this}
      */
     body(...args) {
         this.lastCallCallbackable = -1;
@@ -162,6 +230,8 @@ class MessageFormWithoutCallback extends ButtonForm {
     }
     /**
      * Set button1 on the form (callbackable)
+     * @param {...Parameters<MessageFormData['button1']>} args
+     * @returns {MessageForm}
      */
     button1(...args) {
         this.root.button1(...args);
@@ -170,6 +240,8 @@ class MessageFormWithoutCallback extends ButtonForm {
     }
     /**
      * Set button2 on the form (callbackable)
+     * @param {...Parameters<MessageFormData['button2']>} args
+     * @returns {MessageForm}
      */
     button2(...args) {
         this.root.button2(...args);
@@ -186,6 +258,7 @@ export class MessageForm extends MessageFormWithoutCallback {
     }
     /**
      * Add a callback to the last callbackable element method called (cannot call callback after this method is called)
+     * @param {(receiver: Player, i: number) => void} callback
      */
     callback(callback) {
         if (this.lastCallCallbackable === -1)
@@ -198,6 +271,7 @@ export class MessageForm extends MessageFormWithoutCallback {
 }
 /**
  * this is an enum for the last callbackable element method called
+ * @enum {number}
  */
 var LastCallCallbackable;
 (function (LastCallCallbackable) {
@@ -211,14 +285,25 @@ var LastCallCallbackable;
  * This class basically controls when callback can be called for callbackable elements
  */
 class ModalFormWithoutCallback extends Form {
+    /**
+     * @type {ModalFormData}
+     */
     root = new ModalFormData();
+    /**
+     * @type {(((receiver: Player, data: string | number | boolean, i: number) => void) | undefined)[]}
+     */
     callbacks = [];
+    /**
+     * @type {LastCallCallbackable}
+     */
     lastCallCallbackable = LastCallCallbackable.none;
     constructor() {
         super();
     }
     /**
      * Set the title of the form (cannot call callback after this method is called)
+     * @param {...Parameters<ModalFormData['title']>} args
+     * @returns {this}
      */
     title(...args) {
         this.lastCallCallbackable = LastCallCallbackable.none;
@@ -227,6 +312,8 @@ class ModalFormWithoutCallback extends Form {
     }
     /**
      * Addes a dropdown to the form (callbackable)
+     * @param {...Parameters<ModalFormData['dropdown']>} args
+     * @returns {ModalFormWithCallback<number>}
      */
     dropdown(...args) {
         this.lastCallCallbackable = LastCallCallbackable.dropdown;
@@ -236,6 +323,8 @@ class ModalFormWithoutCallback extends Form {
     }
     /**
      * Addes a slider to the form (callbackable)
+     * @param {...Parameters<ModalFormData['slider']>} args
+     * @returns {ModalFormWithCallback<number>}
      */
     slider(...args) {
         this.lastCallCallbackable = LastCallCallbackable.slider;
@@ -245,6 +334,8 @@ class ModalFormWithoutCallback extends Form {
     }
     /**
      * Addes a text field to the form (callbackable)
+     * @param {...Parameters<ModalFormData['textField']>} args
+     * @returns {ModalFormWithCallback<string>}
      */
     textField(...args) {
         this.lastCallCallbackable = LastCallCallbackable.textFeild;
@@ -254,6 +345,8 @@ class ModalFormWithoutCallback extends Form {
     }
     /**
      * Addes a toggle to the form (callbackable)
+     * @param {...Parameters<ModalFormData['toggle']>} args
+     * @returns {ModalFormWithCallback<boolean>}
      */
     toggle(...args) {
         this.lastCallCallbackable = LastCallCallbackable.toggle;
@@ -263,54 +356,73 @@ class ModalFormWithoutCallback extends Form {
     }
     /**
      * Show the form to a player and runs a callback if available depending what action or state the player is in or inputed (cannot call callback after this method is called)
+     * @param {Player} receiver
+     * @returns {Promise<ModalFormResponse>}
      */
     async show(receiver) {
-        this.lastCallCallbackable = LastCallCallbackable.none;
-        const response = await this.root.show(receiver);
-        const { canceled, cancelationReason, formValues = [] } = response;
-        if (canceled) {
-            switch (cancelationReason) {
-                case FormCancelationReason.UserBusy:
-                    this._busyCallback?.(receiver);
-                    break;
-                case FormCancelationReason.UserClosed:
-                    this._closeCallback?.(receiver);
-                    break;
+        try {
+            this.lastCallCallbackable = LastCallCallbackable.none;
+            const response = await this.root.show(receiver);
+            const { canceled, cancelationReason, formValues = [] } = response;
+            if (canceled) {
+                switch (cancelationReason) {
+                    case FormCancelationReason.UserBusy:
+                        this._busyCallback?.(receiver);
+                        break;
+                    case FormCancelationReason.UserClosed:
+                        this._closeCallback?.(receiver);
+                        break;
+                }
             }
+            else {
+                this.callbacks.forEach((callback, i) => {
+                    callback?.(receiver, formValues[i], i);
+                });
+            }
+            return response;
         }
-        else {
-            this.callbacks.forEach((callback, i) => {
-                callback?.(receiver, formValues[i], i);
-            });
+        catch (error) {
+            console.warn(error.stack);
+            throw error;
         }
-        return response;
     }
+    /**
+     * await until the player is not busy then Show the form to a player and runs a callback if available depending what action or state the player is in or inputed (cannot call callback after this method is called)
+     * @param {Player} receiver
+     * @returns {Promise<ModalFormResponse>}
+     */
     async showAwaitNotBusy(receiver) {
-        this.lastCallCallbackable = LastCallCallbackable.none;
-        let response;
-        while (true) {
-            if (!receiver || !receiver.isValid())
-                return;
-            response = await this.root.show(receiver);
-            if (response.cancelationReason !== FormCancelationReason.UserBusy) {
-                break;
-            }
-            await sleep();
-        }
-        const { canceled, cancelationReason, formValues = [] } = response;
-        if (canceled) {
-            switch (cancelationReason) {
-                case FormCancelationReason.UserClosed:
-                    this._closeCallback?.(receiver);
+        try {
+            this.lastCallCallbackable = LastCallCallbackable.none;
+            let response;
+            while (true) {
+                if (!receiver || !receiver.isValid())
+                    return;
+                response = await this.root.show(receiver);
+                if (response.cancelationReason !== FormCancelationReason.UserBusy) {
                     break;
+                }
+                await sleep();
             }
+            const { canceled, cancelationReason, formValues = [] } = response;
+            if (canceled) {
+                switch (cancelationReason) {
+                    case FormCancelationReason.UserClosed:
+                        this._closeCallback?.(receiver);
+                        break;
+                }
+            }
+            else {
+                this.callbacks.forEach((callback, i) => {
+                    callback?.(receiver, formValues[i], i);
+                });
+            }
+            return response;
         }
-        else {
-            this.callbacks.forEach((callback, i) => {
-                callback?.(receiver, formValues[i], i);
-            });
+        catch (error) {
+            console.warn(error.stack);
+            throw error;
         }
-        return response;
     }
 }
 export class ModalFormWithCallback extends ModalFormWithoutCallback {
@@ -319,6 +431,8 @@ export class ModalFormWithCallback extends ModalFormWithoutCallback {
     }
     /**
      * Add a callback to the last callbackable element method called (cannot call callback after this method is called)
+     * @param {(receiver: Player, data: lastCallbackData, i: number) => void} callback
+     * @returns {ModalFormWithoutCallback}
      */
     callback(callback) {
         if (this.lastCallCallbackable === LastCallCallbackable.none)

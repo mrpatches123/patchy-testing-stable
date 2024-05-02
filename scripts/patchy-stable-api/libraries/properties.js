@@ -1,5 +1,5 @@
 import { Player, World, world } from "@minecraft/server";
-import { isDefined, isVector3 } from "./utilities";
+import { chunkString, isDefined, isVector3 } from "./utilities";
 import { StorageChangedType, customEvents } from "./events";
 export class Storage {
     managers = { 'world': new WorldStorageManager(world) };
@@ -32,6 +32,7 @@ var DynamicPropertyTypes;
     DynamicPropertyTypes["number"] = "number";
     DynamicPropertyTypes["boolean"] = "boolean";
     DynamicPropertyTypes["vector3"] = "vector3";
+    DynamicPropertyTypes["json"] = "json";
 })(DynamicPropertyTypes || (DynamicPropertyTypes = {}));
 const fixObjectiveName = '$entity$_$storage234';
 let fixObjective;
@@ -41,6 +42,7 @@ try {
 catch {
     fixObjective = world.scoreboard.getObjective(fixObjectiveName);
 }
+const chunkAmountJSON = 10922;
 class DynamicPropertyManager {
     dynamicProperties = {};
     root;
@@ -79,6 +81,57 @@ class DynamicPropertyManager {
             this.dynamicProperties[key].gotten = true;
             this.dynamicProperties[key].value = this.root.getDynamicProperty(key);
             this.dynamicProperties[key].type = DynamicPropertyTypes.string;
+        }
+        return this.dynamicProperties[key]?.value;
+    }
+    setJSON(key, value) {
+        if (typeof key !== 'string')
+            throw new Error('key is not of type string');
+        const { type = DynamicPropertyTypes.json, gotten = false } = this.dynamicProperties[key] ?? {};
+        if (type !== DynamicPropertyTypes.json)
+            throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
+        if (!isDefined(value))
+            return this.removeJSON(key);
+        let cancel = false;
+        cancel = customEvents.jsonDynamicPropertyChanged.runEvent(this.root, key, this.getJSON(key), value).cancel;
+        cancel = customEvents.storageChanged.runEvent(this.root, key, StorageChangedType.JSON, this.getJSON(key), value).cancel;
+        if (cancel)
+            return;
+        this.dynamicProperties[key] ??= {};
+        this.dynamicProperties[key].type = DynamicPropertyTypes.json;
+        this.dynamicProperties[key].value = value;
+        this.dynamicProperties[key].gotten = true;
+        const stringValue = JSON.stringify(value);
+        const chunks = chunkString(stringValue, chunkAmountJSON);
+        const previousChunks = (this.root.getDynamicProperty(`${key}_chunks`) ?? 0);
+        if (previousChunks > chunks.length) {
+            for (let i = chunks.length; i < previousChunks; i++) {
+                this.root.setDynamicProperty(`${key}_${i}`, undefined);
+            }
+        }
+        chunks.forEach((chunk, index) => {
+            this.root.setDynamicProperty(`${key}_${index}`, chunk);
+        });
+        this.root.setDynamicProperty(`${key}_chunks`, chunks.length);
+    }
+    getJSON(key) {
+        if (typeof key !== 'string')
+            throw new Error('key is not of type string');
+        const { type = DynamicPropertyTypes.json, gotten = false } = this.dynamicProperties[key] ?? {};
+        this.dynamicProperties[key] ??= {};
+        if (type !== DynamicPropertyTypes.json)
+            throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
+        if (!gotten) {
+            const chunks = Array.from({ length: (this.root.getDynamicProperty(`${key}_chunks`) ?? 0) }, (_, index) => this.root.getDynamicProperty(`${key}_${index}`));
+            this.dynamicProperties[key].gotten = true;
+            try {
+                this.dynamicProperties[key].value = JSON.parse(chunks.join(''));
+            }
+            catch (error) {
+                // console.warn(`Error parsing JSON for key: ${key}, ${error.stack}`);
+                this.dynamicProperties[key].value = undefined;
+            }
+            this.dynamicProperties[key].type = DynamicPropertyTypes.json;
         }
         return this.dynamicProperties[key]?.value;
     }
@@ -204,6 +257,26 @@ class DynamicPropertyManager {
         this.dynamicProperties[key].gotten = true;
         delete this.dynamicProperties[key].value;
     }
+    removeJSON(key) {
+        if (typeof key !== 'string')
+            throw new Error('key is not of type string');
+        const { type = DynamicPropertyTypes.json, gotten = false } = this.dynamicProperties[key] ?? {};
+        if (type !== DynamicPropertyTypes.json)
+            throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
+        let cancel = false;
+        cancel = customEvents.jsonDynamicPropertyChanged.runEvent(this.root, key, this.getJSON(key), undefined).cancel;
+        cancel = customEvents.storageChanged.runEvent(this.root, key, StorageChangedType.JSON, this.getJSON(key), undefined).cancel;
+        if (cancel)
+            return;
+        this.dynamicProperties[key] ??= {};
+        this.dynamicProperties[key].type = DynamicPropertyTypes.json;
+        this.dynamicProperties[key].gotten = true;
+        delete this.dynamicProperties[key].value;
+        const previousChunks = (this.root.getDynamicProperty(`${key}_chunks`) ?? 0);
+        for (let i = 0; i < previousChunks; i++) {
+            this.root.setDynamicProperty(`${key}_${i}`, undefined);
+        }
+    }
     removeNumber(key) {
         if (typeof key !== 'string')
             throw new Error('key is not of type string');
@@ -303,6 +376,18 @@ class DynamicPropertyManager {
             },
             get: (target, key, receiver) => {
                 return thisEntityStorage.getString(key);
+            }
+        });
+    }
+    get jsons() {
+        const thisEntityStorage = this;
+        return new Proxy({}, {
+            set: (target, key, value, receiver) => {
+                thisEntityStorage.setJSON(key, value);
+                return Reflect.set(target, key, value, receiver);
+            },
+            get: (target, key, receiver) => {
+                return thisEntityStorage.getJSON(key);
             }
         });
     }

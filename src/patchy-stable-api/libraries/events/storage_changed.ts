@@ -7,6 +7,7 @@ export enum StorageChangedType {
 	Boolean = "boolean",
 	String = "string",
 	Vector3 = "vector3",
+	JSON = "JSON",
 	Score = "score",
 	All = "all",
 }

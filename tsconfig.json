@@ -22,6 +22,9 @@
 		"listFiles": false,
 		"noEmitHelpers": true,
 		"removeComments": false,
+		"skipLibCheck": true,
+		"preserveConstEnums": true,
+		"isolatedModules": true
 	},
 	"include": [
 		"src/**/*.ts",

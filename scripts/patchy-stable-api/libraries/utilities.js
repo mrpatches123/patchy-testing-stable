@@ -1,4 +1,5 @@
 import { world, system } from "@minecraft/server";
+import { Vector } from "./vector";
 export const overworld = world.getDimension("overworld");
 export const nether = world.getDimension("nether");
 export const end = world.getDimension("the_end");
@@ -33,6 +34,14 @@ export function chunkString(str, length) {
     }
     return array;
 }
+export const facingDirectionToVector3 = {
+    0: { x: 0, y: -1, z: 0 },
+    1: { x: 0, y: 1, z: 0 },
+    2: { x: 0, y: 0, z: 1 },
+    3: { x: 0, y: 0, z: -1 },
+    4: { x: 1, y: 0, z: 0 },
+    5: { x: -1, y: 0, z: 0 },
+};
 export function parseCommand(message, prefix) {
     const messageLength = message.length;
     let finding = false;
@@ -242,7 +251,7 @@ export async function spawnEntityAsync(dimension, typeId, location, callback, ti
             const { x, y, z } = location;
             if (tickingArea) {
                 tickAreaCreated = true;
-                await dimension.runCommandAsync(`tickingarea add ${x} ${y} ${z} ${x} ${y} ${z} spawnEntityAsyncTick`);
+                await dimension.runCommandAsync(`tickingarea add ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} spawnEntityAsyncTick`);
             }
             const runId = system.runInterval(async () => {
                 try {
@@ -259,7 +268,51 @@ export async function spawnEntityAsync(dimension, typeId, location, callback, ti
                 }
             });
         }));
-        callback?.(entity);
+        await callback?.(entity);
+        if (tickAreaCreated)
+            await dimension.runCommandAsync(`tickingarea remove spawnEntityAsyncTick`);
+    }
+    catch (error) {
+        console.warn('ingore', error, error.stack);
+    }
+    return entity;
+}
+/**
+ * Entity may not be loaded once
+ */
+export async function spawnItemAsync(dimension, itemStack, location, callback, tickingArea = true) {
+    let entity;
+    try {
+        try {
+            entity = dimension.spawnItem(itemStack, location);
+        }
+        catch (error) {
+            console.warn('ingore', error, error.stack);
+        }
+        let tickAreaCreated = false;
+        console.warn(entity?.isValid() ?? "");
+        entity = ((entity && !entity.isValid()) ? entity : await new Promise(async (resolve) => {
+            const { x, y, z } = location;
+            if (tickingArea) {
+                tickAreaCreated = true;
+                await dimension.runCommandAsync(`tickingarea add ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} spawnEntityAsyncTick`);
+            }
+            const runId = system.runInterval(async () => {
+                try {
+                    entity = (!entity) ? dimension.spawnItem(itemStack, location) : entity;
+                    if (!entity)
+                        return;
+                    if (!entity.isValid())
+                        return;
+                    system.clearRun(runId);
+                    resolve(entity);
+                }
+                catch (error) {
+                    console.warn('ingore', error, error.stack);
+                }
+            });
+        }));
+        await callback?.(entity);
         if (tickAreaCreated)
             dimension.runCommandAsync(`tickingarea remove spawnEntityAsyncTick`);
     }
@@ -267,4 +320,187 @@ export async function spawnEntityAsync(dimension, typeId, location, callback, ti
         console.warn('ingore', error, error.stack);
     }
     return entity;
+}
+export async function getEntityAsync(dimension, entityQueryOptions, callback, timeoutTicks = Infinity, tickingArea = true) {
+    let entity;
+    try {
+        if (!entityQueryOptions.location)
+            throw new Error('location is required');
+        entityQueryOptions.closest = 1;
+        const { x, y, z } = entityQueryOptions.location;
+        try {
+            entity = dimension.getEntities(entityQueryOptions)[0];
+        }
+        catch (error) {
+            console.warn('ingore', error, error.stack);
+        }
+        let tickAreaCreated = false;
+        let i = 0;
+        entity = ((entity && !entity.isValid()) ? entity : await new Promise(async (resolve) => {
+            if (tickingArea) {
+                tickAreaCreated = true;
+                await dimension.runCommandAsync(`tickingarea add ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} spawnEntityAsyncTick`);
+            }
+            const runId = system.runInterval(async () => {
+                if (i++ > timeoutTicks) {
+                    system.clearRun(runId);
+                    resolve(entity);
+                }
+                try {
+                    entity = (!entity) ? dimension.getEntities(entityQueryOptions)[0] : entity;
+                    if (!entity)
+                        return;
+                    if (!entity.isValid())
+                        return;
+                    system.clearRun(runId);
+                    resolve(entity);
+                }
+                catch (error) {
+                    console.warn('ingore', error, error.stack);
+                }
+            });
+        }));
+        await callback?.(entity);
+        if (tickAreaCreated)
+            await dimension.runCommandAsync(`tickingarea remove spawnEntityAsyncTick`);
+    }
+    catch (error) {
+        console.warn('ingore', error, error.stack);
+    }
+    return entity;
+}
+export async function getBlockArrayAsync(dimension, blockLocations, callback, tickingArea = true) {
+    try {
+        let locations = [Vector.minVectors(blockLocations).toVector3(), Vector.minVectors(blockLocations).toVector3()];
+        let blocks = Array(blockLocations.length);
+        let tickingAreaCreated = false;
+        async function createTickingArea() {
+            if (!tickingArea || tickingAreaCreated)
+                return;
+            tickingAreaCreated = true;
+            await dimension.runCommandAsync(`tickingarea add ${Math.floor(locations[0].x)} ${Math.floor(locations[0].y)} ${Math.floor(locations[0].z)} ${Math.floor(locations[1].x)} ${Math.floor(locations[1].y)} ${Math.floor(locations[1].z)} getBlockAsyncTick`);
+        }
+        async function removeTickingArea() {
+            if (!tickingAreaCreated)
+                return;
+            await dimension.runCommandAsync(`tickingarea remove getBlockAsyncTick`);
+        }
+        for (let i = 0; i < blockLocations.length; i++) {
+            let location = blockLocations[i];
+            let block;
+            try {
+                try {
+                    block = dimension.getBlock(location);
+                }
+                catch (error) {
+                    console.warn('ingore', error, error.stack);
+                }
+                block = ((block && !block.isValid()) ? block : await new Promise(async (resolve) => {
+                    try {
+                        await createTickingArea();
+                        const runId = system.runInterval(async () => {
+                            try {
+                                block = (!block) ? dimension.getBlock(location) : block;
+                                if (!block)
+                                    return;
+                                if (!block.isValid())
+                                    return;
+                                system.clearRun(runId);
+                                resolve(block);
+                            }
+                            catch (error) {
+                                console.warn('ingore', error, error.stack);
+                            }
+                        });
+                    }
+                    catch (error) {
+                        console.warn('ingore', error, error.stack);
+                    }
+                }));
+                blocks[i++] = block;
+            }
+            catch (error) {
+                console.warn('ingore', error, error.stack);
+            }
+        }
+        await removeTickingArea();
+        callback?.(blocks);
+        return blocks;
+    }
+    catch (error) {
+        console.warn('ingore', error, error.stack);
+    }
+    return [];
+}
+export async function getBlocksAsync(dimension, blockLocations, callback, tickingArea = true) {
+    try {
+        let locations;
+        if (isVector3(blockLocations))
+            locations = [blockLocations, blockLocations];
+        else {
+            locations = [Vector.min(blockLocations[0], blockLocations[1]).toVector3(), Vector.max(blockLocations[0], blockLocations[1]).toVector3()];
+        }
+        let blocks = Array(Vector.areaBetweenFloored(locations[0], locations[1]));
+        let tickingAreaCreated = false;
+        async function createTickingArea() {
+            if (!tickingArea || tickingAreaCreated)
+                return;
+            tickingAreaCreated = true;
+            await dimension.runCommandAsync(`tickingarea add ${Math.floor(locations[0].x)} ${Math.floor(locations[0].y)} ${Math.floor(locations[0].z)} ${Math.floor(locations[1].x)} ${Math.floor(locations[1].y)} ${Math.floor(locations[1].z)} getBlockAsyncTick`);
+        }
+        async function removeTickingArea() {
+            if (!tickingAreaCreated)
+                return;
+            await dimension.runCommandAsync(`tickingarea remove getBlockAsyncTick`);
+        }
+        for (let i = 0, x = locations[0].x; x <= locations[1].x; x++) {
+            for (let y = locations[0].y; y <= locations[1].y; y++) {
+                for (let z = locations[0].z; z <= locations[1].z; z++, i++) {
+                    let block;
+                    const location = { x, y, z };
+                    try {
+                        try {
+                            block = dimension.getBlock(location);
+                        }
+                        catch (error) {
+                            console.warn('ingore', error, error.stack);
+                        }
+                        block = ((block && !block.isValid()) ? block : await new Promise(async (resolve) => {
+                            try {
+                                await createTickingArea();
+                                const runId = system.runInterval(async () => {
+                                    try {
+                                        block = (!block) ? dimension.getBlock(location) : block;
+                                        if (!block)
+                                            return;
+                                        if (!block.isValid())
+                                            return;
+                                        system.clearRun(runId);
+                                        resolve(block);
+                                    }
+                                    catch (error) {
+                                        console.warn('ingore', error, error.stack);
+                                    }
+                                });
+                            }
+                            catch (error) {
+                                console.warn('ingore', error, error.stack);
+                            }
+                        }));
+                        blocks[i++] = block;
+                    }
+                    catch (error) {
+                        console.warn('ingore', error, error.stack);
+                    }
+                }
+            }
+        }
+        await removeTickingArea();
+        callback?.(blocks);
+        return blocks;
+    }
+    catch (error) {
+        console.warn('ingore', error, error.stack);
+    }
+    return [];
 }

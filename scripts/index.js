@@ -1,6 +1,7 @@
 import { ItemStack, Player, system, world } from "@minecraft/server";
-import { ActionForm, MessageForm, ModalForm } from "patchy-stable-api/libraries/form";
-import { storage } from "patchy-stable-api/libraries/properties";
+import { ActionForm, MessageForm, ModalForm } from "./patchy-stable-api/libraries/form";
+import { MinecraftItemTypes } from "./patchy-stable-api/libraries/vanilla-data";
+import { storage } from "./patchy-stable-api/libraries/properties";
 const itemsFunctions = {
     "action": (source) => {
         const form = new ActionForm();
@@ -47,23 +48,23 @@ const itemsFunctions = {
 world.afterEvents.itemUse.subscribe((event) => {
     const { source, itemStack } = event;
     switch (itemStack.typeId) {
-        case "minecraft:brush" /* MinecraftItemTypes.Brush */: {
+        case MinecraftItemTypes.Brush: {
             const container = source.getComponent('minecraft:inventory').container;
             for (let i = 0; i < container.size; i++) {
                 const item = container.getItem(i);
                 if (!item)
                     continue;
-                if (item.typeId === "minecraft:stick" /* MinecraftItemTypes.Stick */) {
+                if (item.typeId === MinecraftItemTypes.Stick) {
                     container.setItem(i);
                 }
             }
             Object.entries(itemsFunctions).forEach(([key, value]) => {
-                const item = new ItemStack("minecraft:stick" /* MinecraftItemTypes.Stick */, 1);
+                const item = new ItemStack(MinecraftItemTypes.Stick, 1);
                 item.nameTag = key;
                 container.addItem(item);
             });
         }
-        case "minecraft:stick" /* MinecraftItemTypes.Stick */: {
+        case MinecraftItemTypes.Stick: {
             itemsFunctions[itemStack.nameTag ?? ""]?.(source);
         }
     }

@@ -120,6 +120,9 @@ export class Vector {
 		const DirectionZ = this.z / magnitude;
 		return new Vector(DirectionX, DirectionY, DirectionZ);
 	}
+	toVector3(): Vector3 {
+		return { x: this.x, y: this.y, z: this.z };
+	}
 	/**
 	 * @remarks
 	 * Returns the addition of these vectors.
@@ -216,13 +219,8 @@ export class Vector {
 	 * @returns {Vector}
 	 */
 	static max(a: Vector3, b: Vector3): Vector {
-		const vectors = [a, b];
-		const arr = vectors.map(({ x, y, z }) => new Vector(x, y, z).length());
-		const max = Math.max(...arr);
-		const index = arr.indexOf(max);
-		const vector3 = vectors[index];
+		return new Vector(Math.max(a.x, b.x), Math.max(a.y, b.y), Math.max(a.z, b.z));
 
-		return new Vector(vector3.x, vector3.y, vector3.z);
 	}
 	/**
 	 * @remarks
@@ -233,13 +231,7 @@ export class Vector {
 	 * @returns {Vector}
 	 */
 	static min(a: Vector3, b: Vector3): Vector {
-		const vectors = [a, b];
-		const arr = vectors.map(({ x, y, z }) => new Vector(x, y, z).length());
-		const min = Math.min(...arr);
-		const index = arr.indexOf(min);
-		const vector3 = vectors[index];
-
-		return new Vector(vector3.x, vector3.y, vector3.z);
+		return new Vector(Math.min(a.x, b.x), Math.min(a.y, b.y), Math.min(a.z, b.z));
 	}
 	/**
 	 * @remarks
@@ -309,5 +301,23 @@ export class Vector {
 		}
 
 		return vector;
+	}
+	static areaBetweenFloored(a: Vector3, b: Vector3): number {
+		const vector = Vector.subtract(b, a);
+		return Math.floor(vector.x + 1) * Math.floor(vector.y + 1) * Math.floor(vector.z + 1);
+	}
+	static minVectors(vectors: Vector3[]) {
+		let min = vectors[0];
+		for (let i = 1; i < vectors.length; i++) {
+			min = Vector.min(min, vectors[i]);
+		}
+		return new Vector(min.x, min.y, min.z);
+	}
+	static maxVectors(vectors: Vector3[]) {
+		let max = vectors[0];
+		for (let i = 1; i < vectors.length; i++) {
+			max = Vector.max(max, vectors[i]);
+		}
+		return new Vector(max.x, max.y, max.z);
 	}
 }

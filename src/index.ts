@@ -1,7 +1,7 @@
 import { EntityInventoryComponent, ItemStack, Player, system, world } from "@minecraft/server";
-import { ActionForm, MessageForm, ModalForm } from "patchy-stable-api/libraries/form";
-import { MinecraftItemTypes } from "patchy-stable-api/libraries/vanilla-data";
-import { storage } from "patchy-stable-api/libraries/properties";
+import { ActionForm, MessageForm, ModalForm } from "./patchy-stable-api/libraries/form";
+import { MinecraftItemTypes } from "./patchy-stable-api/libraries/vanilla-data";
+import { storage } from "./patchy-stable-api/libraries/properties";
 
 const itemsFunctions: Record<string, (source: Player) => void> = {
 	"action": (source) => {

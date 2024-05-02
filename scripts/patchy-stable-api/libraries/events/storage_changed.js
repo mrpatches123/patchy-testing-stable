@@ -5,6 +5,7 @@ export var StorageChangedType;
     StorageChangedType["Boolean"] = "boolean";
     StorageChangedType["String"] = "string";
     StorageChangedType["Vector3"] = "vector3";
+    StorageChangedType["JSON"] = "JSON";
     StorageChangedType["Score"] = "score";
     StorageChangedType["All"] = "all";
 })(StorageChangedType || (StorageChangedType = {}));
