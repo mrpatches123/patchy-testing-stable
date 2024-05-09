@@ -11,6 +11,15 @@ export const content = {
         chunkString(messages.map(message => JSON.stringify(message, (key, value) => (value instanceof Function) ? '<f>' : value, 4)).join(' '), 500).forEach(message => world.sendMessage(message));
     }
 };
+export function toProperCaseTypeId(typeId) {
+    return toProperCase(typeId.replace(/\w+:/, ""));
+}
+export function toProperCase(string) {
+    return string.replace(/_./g, ' ').replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+}
+export function toCamelCase(str) {
+    return str.replace(/(?:^\w|[A-Z]|(\b|_)\w)/g, (word, index) => word.toUpperCase()).replace(/[\s_]+/g, '').replace(/\w/, (world) => world.toLowerCase());
+}
 try {
     world.scoreboard.addObjective("test");
 }
