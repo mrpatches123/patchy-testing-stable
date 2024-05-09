@@ -5,6 +5,23 @@ import { Vector } from "./vector";
 export const overworld = world.getDimension("overworld");
 export const nether = world.getDimension("nether");
 export const end = world.getDimension("the_end");
+export const content = {
+	warn(...messages: any[]) {
+		console.warn(messages.map(message => JSON.stringify(message, (key, value) => (value instanceof Function) ? '<f>' : value)).join(' '));
+	},
+	chatFormat(...messages: any[]) {
+		chunkString(messages.map(message => JSON.stringify(message, (key, value) => (value instanceof Function) ? '<f>' : value, 4)).join(' '), 500).forEach(message => world.sendMessage(message));
+	}
+};
+export function toProperCaseTypeId(typeId: string) {
+	return toProperCase(typeId.replace(/\w+:/, ""));
+}
+export function toProperCase(string: string) {
+	return string.replace(/_./g, ' ').replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+}
+export function toCamelCase(str: string) {
+	return str.replace(/(?:^\w|[A-Z]|(\b|_)\w)/g, (word, index) => word.toUpperCase()).replace(/[\s_]+/g, '').replace(/\w/, (world) => world.toLowerCase());
+}
 try {
 	world.scoreboard.addObjective("test");
 } catch (e) { }
@@ -289,7 +306,7 @@ export async function spawnItemAsync(dimension: Dimension, itemStack: ItemStack,
 			const { x, y, z } = location;
 			if (tickingArea) {
 				tickAreaCreated = true;
-				await dimension.runCommandAsync(`tickingarea add ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} spawnEntityAsyncTick`);
+				await dimension.runCommandAsync(`tickingarea add ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} spawnItemAsyncTick`);
 			}
 			const runId = system.runInterval(async () => {
 				try {
@@ -306,7 +323,7 @@ export async function spawnItemAsync(dimension: Dimension, itemStack: ItemStack,
 		}))!;
 
 		await callback?.(entity);
-		if (tickAreaCreated) dimension.runCommandAsync(`tickingarea remove spawnEntityAsyncTick`);
+		if (tickAreaCreated) await dimension.runCommandAsync(`tickingarea remove spawnItemAsyncTick`);
 
 	} catch (error: any) {
 		console.warn('ingore', error, error.stack);
@@ -360,7 +377,7 @@ export async function getEntityAsync(dimension: Dimension, entityQueryOptions: E
 }
 export async function getBlockArrayAsync(dimension: Dimension, blockLocations: Vector3[], callback?: (blocks: Block[]) => void | Promise<void>, tickingArea: boolean = true): Promise<Block[]> {
 	try {
-		let locations = [Vector.minVectors(blockLocations).toVector3(), Vector.minVectors(blockLocations).toVector3()];
+		let locations = [Vector.minVectors(blockLocations).toVector3(), Vector.maxVectors(blockLocations).toVector3()];
 		let blocks: (Block | undefined)[] = Array(blockLocations.length);
 		let tickingAreaCreated = false;
 		async function createTickingArea() {
@@ -400,7 +417,7 @@ export async function getBlockArrayAsync(dimension: Dimension, blockLocations: V
 						console.warn('ingore', error, error.stack);
 					}
 				}))!;
-				blocks[i++] = block;
+				blocks[i] = block;
 			} catch (error: any) {
 				console.warn('ingore', error, error.stack);
 			}
@@ -478,4 +495,26 @@ export async function getBlocksAsync(dimension: Dimension, blockLocations: Vecto
 		console.warn('ingore', error, error.stack);
 	}
 	return [];
+}
+/**
+ * @param {() => void | Promise<void>} callback
+ * @param {number} tickDelay 
+ * @returns {() => void} cancel() run to cancel
+ */
+export function systemRunIntervalAwaitCallback(callback: () => void | Promise<void>, tickDelay = 0): () => void {
+
+	let currentId: number | undefined;
+	const run = async () => {
+		try {
+			await callback();
+			currentId = system.runTimeout(run, tickDelay);
+		} catch (error: any) {
+			console.warn("Error below stack: ", error.stack);
+			throw error;
+		}
+	};
+	currentId = system.run(run);
+	return () => {
+		if (isDefined(currentId)) system.clearRun(currentId);
+	};
 }

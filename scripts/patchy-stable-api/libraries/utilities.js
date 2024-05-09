@@ -3,6 +3,14 @@ import { Vector } from "./vector";
 export const overworld = world.getDimension("overworld");
 export const nether = world.getDimension("nether");
 export const end = world.getDimension("the_end");
+export const content = {
+    warn(...messages) {
+        console.warn(messages.map(message => JSON.stringify(message, (key, value) => (value instanceof Function) ? '<f>' : value)).join(' '));
+    },
+    chatFormat(...messages) {
+        chunkString(messages.map(message => JSON.stringify(message, (key, value) => (value instanceof Function) ? '<f>' : value, 4)).join(' '), 500).forEach(message => world.sendMessage(message));
+    }
+};
 try {
     world.scoreboard.addObjective("test");
 }
@@ -295,7 +303,7 @@ export async function spawnItemAsync(dimension, itemStack, location, callback, t
             const { x, y, z } = location;
             if (tickingArea) {
                 tickAreaCreated = true;
-                await dimension.runCommandAsync(`tickingarea add ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} spawnEntityAsyncTick`);
+                await dimension.runCommandAsync(`tickingarea add ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} spawnItemAsyncTick`);
             }
             const runId = system.runInterval(async () => {
                 try {
@@ -314,7 +322,7 @@ export async function spawnItemAsync(dimension, itemStack, location, callback, t
         }));
         await callback?.(entity);
         if (tickAreaCreated)
-            dimension.runCommandAsync(`tickingarea remove spawnEntityAsyncTick`);
+            await dimension.runCommandAsync(`tickingarea remove spawnItemAsyncTick`);
     }
     catch (error) {
         console.warn('ingore', error, error.stack);
@@ -371,7 +379,7 @@ export async function getEntityAsync(dimension, entityQueryOptions, callback, ti
 }
 export async function getBlockArrayAsync(dimension, blockLocations, callback, tickingArea = true) {
     try {
-        let locations = [Vector.minVectors(blockLocations).toVector3(), Vector.minVectors(blockLocations).toVector3()];
+        let locations = [Vector.minVectors(blockLocations).toVector3(), Vector.maxVectors(blockLocations).toVector3()];
         let blocks = Array(blockLocations.length);
         let tickingAreaCreated = false;
         async function createTickingArea() {
@@ -417,7 +425,7 @@ export async function getBlockArrayAsync(dimension, blockLocations, callback, ti
                         console.warn('ingore', error, error.stack);
                     }
                 }));
-                blocks[i++] = block;
+                blocks[i] = block;
             }
             catch (error) {
                 console.warn('ingore', error, error.stack);
@@ -503,4 +511,27 @@ export async function getBlocksAsync(dimension, blockLocations, callback, tickin
         console.warn('ingore', error, error.stack);
     }
     return [];
+}
+/**
+ * @param {() => void | Promise<void>} callback
+ * @param {number} tickDelay
+ * @returns {() => void} cancel() run to cancel
+ */
+export function systemRunIntervalAwaitCallback(callback, tickDelay = 0) {
+    let currentId;
+    const run = async () => {
+        try {
+            await callback();
+            currentId = system.runTimeout(run, tickDelay);
+        }
+        catch (error) {
+            console.warn("Error below stack: ", error.stack);
+            throw error;
+        }
+    };
+    currentId = system.run(run);
+    return () => {
+        if (isDefined(currentId))
+            system.clearRun(currentId);
+    };
 }
