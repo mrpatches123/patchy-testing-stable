@@ -265,6 +265,14 @@ export async function spawnEntityAsync(dimension, typeId, location, callback, ti
         let tickAreaCreated = false;
         console.warn(entity?.isValid() ?? "");
         entity = ((entity && !entity.isValid()) ? entity : await new Promise(async (resolve) => {
+            let tickingAreaRemoved = false;
+            try {
+                const commandResult = await dimension.runCommandAsync(`tickingarea remove spawnEntityAsyncTick`);
+                tickingAreaRemoved = Boolean(commandResult.successCount);
+            }
+            catch { }
+            if (tickingAreaRemoved)
+                await sleep(1);
             const { x, y, z } = location;
             if (tickingArea) {
                 tickAreaCreated = true;
@@ -309,6 +317,14 @@ export async function spawnItemAsync(dimension, itemStack, location, callback, t
         let tickAreaCreated = false;
         console.warn(entity?.isValid() ?? "");
         entity = ((entity && !entity.isValid()) ? entity : await new Promise(async (resolve) => {
+            let tickingAreaRemoved = false;
+            try {
+                const commandResult = await dimension.runCommandAsync(`tickingarea remove spawnItemAsyncTick`);
+                tickingAreaRemoved = Boolean(commandResult.successCount);
+            }
+            catch { }
+            if (tickingAreaRemoved)
+                await sleep(1);
             const { x, y, z } = location;
             if (tickingArea) {
                 tickAreaCreated = true;
@@ -354,9 +370,17 @@ export async function getEntityAsync(dimension, entityQueryOptions, callback, ti
         let tickAreaCreated = false;
         let i = 0;
         entity = ((entity && !entity.isValid()) ? entity : await new Promise(async (resolve) => {
+            let tickingAreaRemoved = false;
+            try {
+                const commandResult = await dimension.runCommandAsync(`tickingarea remove getEntityAsyncTick`);
+                tickingAreaRemoved = Boolean(commandResult.successCount);
+            }
+            catch { }
+            if (tickingAreaRemoved)
+                await sleep(1);
             if (tickingArea) {
                 tickAreaCreated = true;
-                await dimension.runCommandAsync(`tickingarea add ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} spawnEntityAsyncTick`);
+                await dimension.runCommandAsync(`tickingarea add ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} getEntityAsyncTick`);
             }
             const runId = system.runInterval(async () => {
                 if (i++ > timeoutTicks) {
@@ -379,7 +403,7 @@ export async function getEntityAsync(dimension, entityQueryOptions, callback, ti
         }));
         await callback?.(entity);
         if (tickAreaCreated)
-            await dimension.runCommandAsync(`tickingarea remove spawnEntityAsyncTick`);
+            await dimension.runCommandAsync(`tickingarea remove getEntityAsyncTick`);
     }
     catch (error) {
         console.warn('ingore', error, error.stack);
@@ -394,6 +418,14 @@ export async function getBlockArrayAsync(dimension, blockLocations, callback, ti
         async function createTickingArea() {
             if (!tickingArea || tickingAreaCreated)
                 return;
+            let tickingAreaRemoved = false;
+            try {
+                const commandResult = await dimension.runCommandAsync(`tickingarea remove getBlockAsyncTick`);
+                tickingAreaRemoved = Boolean(commandResult.successCount);
+            }
+            catch { }
+            if (tickingAreaRemoved)
+                await sleep(1);
             tickingAreaCreated = true;
             await dimension.runCommandAsync(`tickingarea add ${Math.floor(locations[0].x)} ${Math.floor(locations[0].y)} ${Math.floor(locations[0].z)} ${Math.floor(locations[1].x)} ${Math.floor(locations[1].y)} ${Math.floor(locations[1].z)} getBlockAsyncTick`);
         }
@@ -462,6 +494,14 @@ export async function getBlocksAsync(dimension, blockLocations, callback, tickin
         async function createTickingArea() {
             if (!tickingArea || tickingAreaCreated)
                 return;
+            let tickingAreaRemoved = false;
+            try {
+                const commandResult = await dimension.runCommandAsync(`tickingarea remove getBlockAsyncTick`);
+                tickingAreaRemoved = Boolean(commandResult.successCount);
+            }
+            catch { }
+            if (tickingAreaRemoved)
+                await sleep(1);
             tickingAreaCreated = true;
             await dimension.runCommandAsync(`tickingarea add ${Math.floor(locations[0].x)} ${Math.floor(locations[0].y)} ${Math.floor(locations[0].z)} ${Math.floor(locations[1].x)} ${Math.floor(locations[1].y)} ${Math.floor(locations[1].z)} getBlockAsyncTick`);
         }
