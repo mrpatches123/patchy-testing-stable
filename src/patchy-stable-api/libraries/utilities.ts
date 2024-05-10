@@ -254,6 +254,7 @@ export function sendMessageMessageToOtherPlayers(excludePlayers: Player[], messa
 export async function spawnEntityAsync(dimension: Dimension, typeId: string, location: Vector3, callback?: (entity: Entity) => void | Promise<void>, tickingArea: boolean = true): Promise<Entity> {
 	let entity: Entity | undefined;
 	try {
+
 		try {
 			entity = dimension.spawnEntity(typeId, location);
 		} catch (error: any) {
@@ -262,6 +263,12 @@ export async function spawnEntityAsync(dimension: Dimension, typeId: string, loc
 		let tickAreaCreated = false;
 		console.warn(entity?.isValid() ?? "");
 		entity = ((entity && !entity.isValid()) ? entity : await new Promise(async (resolve) => {
+			let tickingAreaRemoved = false;
+			try {
+				const commandResult = await dimension.runCommandAsync(`tickingarea remove spawnEntityAsyncTick`);
+				tickingAreaRemoved = Boolean(commandResult.successCount);
+			} catch { }
+			if (tickingAreaRemoved) await sleep(1);
 			const { x, y, z } = location;
 			if (tickingArea) {
 				tickAreaCreated = true;
@@ -303,6 +310,12 @@ export async function spawnItemAsync(dimension: Dimension, itemStack: ItemStack,
 		let tickAreaCreated = false;
 		console.warn(entity?.isValid() ?? "");
 		entity = ((entity && !entity.isValid()) ? entity : await new Promise(async (resolve) => {
+			let tickingAreaRemoved = false;
+			try {
+				const commandResult = await dimension.runCommandAsync(`tickingarea remove spawnItemAsyncTick`);
+				tickingAreaRemoved = Boolean(commandResult.successCount);
+			} catch { }
+			if (tickingAreaRemoved) await sleep(1);
 			const { x, y, z } = location;
 			if (tickingArea) {
 				tickAreaCreated = true;
@@ -345,9 +358,15 @@ export async function getEntityAsync(dimension: Dimension, entityQueryOptions: E
 		let tickAreaCreated = false;
 		let i = 0;
 		entity = ((entity && !entity.isValid()) ? entity : await new Promise(async (resolve) => {
+			let tickingAreaRemoved = false;
+			try {
+				const commandResult = await dimension.runCommandAsync(`tickingarea remove getEntityAsyncTick`);
+				tickingAreaRemoved = Boolean(commandResult.successCount);
+			} catch { }
+			if (tickingAreaRemoved) await sleep(1);
 			if (tickingArea) {
 				tickAreaCreated = true;
-				await dimension.runCommandAsync(`tickingarea add ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} spawnEntityAsyncTick`);
+				await dimension.runCommandAsync(`tickingarea add ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} getEntityAsyncTick`);
 			}
 			const runId = system.runInterval(async () => {
 				if (i++ > timeoutTicks) {
@@ -368,7 +387,7 @@ export async function getEntityAsync(dimension: Dimension, entityQueryOptions: E
 		}))!;
 
 		await callback?.(entity);
-		if (tickAreaCreated) await dimension.runCommandAsync(`tickingarea remove spawnEntityAsyncTick`);
+		if (tickAreaCreated) await dimension.runCommandAsync(`tickingarea remove getEntityAsyncTick`);
 
 	} catch (error: any) {
 		console.warn('ingore', error, error.stack);
@@ -382,6 +401,12 @@ export async function getBlockArrayAsync(dimension: Dimension, blockLocations: V
 		let tickingAreaCreated = false;
 		async function createTickingArea() {
 			if (!tickingArea || tickingAreaCreated) return;
+			let tickingAreaRemoved = false;
+			try {
+				const commandResult = await dimension.runCommandAsync(`tickingarea remove getBlockAsyncTick`);
+				tickingAreaRemoved = Boolean(commandResult.successCount);
+			} catch { }
+			if (tickingAreaRemoved) await sleep(1);
 			tickingAreaCreated = true;
 			await dimension.runCommandAsync(`tickingarea add ${Math.floor(locations[0].x)} ${Math.floor(locations[0].y)} ${Math.floor(locations[0].z)} ${Math.floor(locations[1].x)} ${Math.floor(locations[1].y)} ${Math.floor(locations[1].z)} getBlockAsyncTick`);
 		}
@@ -443,6 +468,12 @@ export async function getBlocksAsync(dimension: Dimension, blockLocations: Vecto
 		let tickingAreaCreated = false;
 		async function createTickingArea() {
 			if (!tickingArea || tickingAreaCreated) return;
+			let tickingAreaRemoved = false;
+			try {
+				const commandResult = await dimension.runCommandAsync(`tickingarea remove getBlockAsyncTick`);
+				tickingAreaRemoved = Boolean(commandResult.successCount);
+			} catch { }
+			if (tickingAreaRemoved) await sleep(1);
 			tickingAreaCreated = true;
 			await dimension.runCommandAsync(`tickingarea add ${Math.floor(locations[0].x)} ${Math.floor(locations[0].y)} ${Math.floor(locations[0].z)} ${Math.floor(locations[1].x)} ${Math.floor(locations[1].y)} ${Math.floor(locations[1].z)} getBlockAsyncTick`);
 		}
