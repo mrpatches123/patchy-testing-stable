@@ -123,3 +123,4 @@ export var MinecraftEntityTypes;
     MinecraftEntityTypes["ZombieVillager"] = "zombie_villager";
     MinecraftEntityTypes["ZombieVillagerV2"] = "zombie_villager_v2";
 })(MinecraftEntityTypes || (MinecraftEntityTypes = {}));
+//# sourceMappingURL=mojang-entity.js.map

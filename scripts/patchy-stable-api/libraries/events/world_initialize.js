@@ -47,3 +47,4 @@ export class WorldInitializeEvent {
     }
 }
 export const worldInitialize = new WorldInitializeEvent();
+//# sourceMappingURL=world_initialize.js.map

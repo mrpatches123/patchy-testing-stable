@@ -17,3 +17,4 @@ export class JSONDynamicPropertyChangedEvent extends StorageChangedEventTemplate
     }
 }
 export const jsonDynamicPropertyChanged = new JSONDynamicPropertyChangedEvent();
+//# sourceMappingURL=json_dynamic_property_changed.js.map

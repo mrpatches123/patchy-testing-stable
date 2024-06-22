@@ -17,3 +17,4 @@ export class Vector3DynamicPropertyChangedEvent extends StorageChangedEventTempl
     }
 }
 export const vector3DynamicPropertyChanged = new Vector3DynamicPropertyChangedEvent();
+//# sourceMappingURL=vector3_dynamic_property_changed.js.map

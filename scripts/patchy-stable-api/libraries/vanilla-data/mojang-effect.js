@@ -35,3 +35,4 @@ export var MinecraftEffectTypes;
     MinecraftEffectTypes["Weakness"] = "weakness";
     MinecraftEffectTypes["Wither"] = "wither";
 })(MinecraftEffectTypes || (MinecraftEffectTypes = {}));
+//# sourceMappingURL=mojang-effect.js.map

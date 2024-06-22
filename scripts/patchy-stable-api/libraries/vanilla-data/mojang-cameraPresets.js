@@ -8,3 +8,4 @@ export var MinecraftCameraPresetsTypes;
     MinecraftCameraPresetsTypes["ThirdPerson"] = "minecraft:third_person";
     MinecraftCameraPresetsTypes["ThirdPersonFront"] = "minecraft:third_person_front";
 })(MinecraftCameraPresetsTypes || (MinecraftCameraPresetsTypes = {}));
+//# sourceMappingURL=mojang-cameraPresets.js.map

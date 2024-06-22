@@ -7,6 +7,7 @@ import { vector3DynamicPropertyChanged } from './events/vector3_dynamic_property
 import { booleanDynamicPropertyChanged } from './events/boolean_dynamic_property_changed.js';
 import { scoreChanged } from './events/score_changed.js';
 import { jsonDynamicPropertyChanged } from './events/json_dynamic_property_changed.js';
+import { beforeItemUseOnFirst } from './events/before_item_use_on_first.js';
 export { StorageChangedType } from './events/storage_changed.js';
 
 export const customEvents = {
@@ -18,6 +19,7 @@ export const customEvents = {
 	numberDynamicPropertyChanged: numberDynamicPropertyChanged,
 	vector3DynamicPropertyChanged: vector3DynamicPropertyChanged,
 	booleanDynamicPropertyChanged: booleanDynamicPropertyChanged,
-	scoreChanged: scoreChanged
+	scoreChanged: scoreChanged,
+	beforeItemUseOnFirst: beforeItemUseOnFirst,
 } as const;
 

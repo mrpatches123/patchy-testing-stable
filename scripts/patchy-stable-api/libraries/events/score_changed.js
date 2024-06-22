@@ -17,3 +17,4 @@ export class BooleanDynamicPropertyChangedEvent extends ScoreChangedEventTemplat
     }
 }
 export const scoreChanged = new BooleanDynamicPropertyChangedEvent();
+//# sourceMappingURL=score_changed.js.map

@@ -9,3 +9,4 @@ export * from './mojang-enchantment.js';
 export * from './mojang-entity.js';
 export * from './mojang-feature.js';
 export * from './mojang-item.js';
+//# sourceMappingURL=index.js.map

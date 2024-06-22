@@ -30,3 +30,4 @@ export class StorageChangedEvent {
     }
 }
 export const storageChanged = new StorageChangedEvent();
+//# sourceMappingURL=storage_changed.js.map

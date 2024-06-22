@@ -24,3 +24,4 @@ export class Iterate {
         this.entitiesRefresh = entitiesRefresh;
     }
 }
+//# sourceMappingURL=iterate.js.map

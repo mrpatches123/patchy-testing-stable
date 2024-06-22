@@ -7,7 +7,7 @@
 		"noLib": false,
 		"emitDecoratorMetadata": false,
 		"experimentalDecorators": true,
-		"sourceMap": false,
+		"sourceMap": true,
 		"forceConsistentCasingInFileNames": true,
 		"strict": true,
 		"checkJs": true,

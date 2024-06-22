@@ -202,3 +202,4 @@ class CustomArgumentedCommand extends BaseCommand {
         super();
     }
 }
+//# sourceMappingURL=command.js.map

@@ -1,7 +1,9 @@
-import { ItemStack, Player, system, world } from "@minecraft/server";
+import { BlockPermutation, Player, system, world } from "@minecraft/server";
 import { ActionForm, MessageForm, ModalForm } from "./patchy-stable-api/libraries/form";
-import { MinecraftItemTypes } from "./patchy-stable-api/libraries/vanilla-data";
+import { MinecraftBlockTypes, MinecraftItemTypes } from "./patchy-stable-api/libraries/vanilla-data";
 import { storage } from "./patchy-stable-api/libraries/properties";
+import { getBlockArrayAsync, overworld } from "patchy-stable-api/libraries/utilities";
+import { customEvents } from "patchy-stable-api/libraries/events";
 const itemsFunctions = {
     "action": (source) => {
         const form = new ActionForm();
@@ -45,38 +47,55 @@ const itemsFunctions = {
             .title('test').show(source);
     }
 };
-world.afterEvents.itemUse.subscribe((event) => {
-    const { source, itemStack } = event;
-    switch (itemStack.typeId) {
-        case MinecraftItemTypes.Brush: {
-            const container = source.getComponent('minecraft:inventory').container;
-            for (let i = 0; i < container.size; i++) {
-                const item = container.getItem(i);
-                if (!item)
-                    continue;
-                if (item.typeId === MinecraftItemTypes.Stick) {
-                    container.setItem(i);
-                }
-            }
-            Object.entries(itemsFunctions).forEach(([key, value]) => {
-                const item = new ItemStack(MinecraftItemTypes.Stick, 1);
-                item.nameTag = key;
-                container.addItem(item);
-            });
-        }
-        case MinecraftItemTypes.Stick: {
-            itemsFunctions[itemStack.nameTag ?? ""]?.(source);
-        }
-    }
-});
-world.beforeEvents.playerBreakBlock.subscribe((event) => {
-    event.cancel = true;
-});
+// world.afterEvents.itemUse.subscribe((event) => {
+// 	const { source, itemStack } = event;
+// 	switch (itemStack.typeId) {
+// 		case MinecraftItemTypes.Brush: {
+// 			const container = (source.getComponent('minecraft:inventory') as EntityInventoryComponent)!.container!;
+// 			for (let i = 0; i < container.size; i++) {
+// 				const item = container.getItem(i);
+// 				if (!item) continue;
+// 				if (item.typeId === MinecraftItemTypes.Stick) {
+// 					container.setItem(i);
+// 				}
+// 			}
+// 			Object.entries(itemsFunctions).forEach(([key, value]) => {
+// 				const item = new ItemStack(MinecraftItemTypes.Stick, 1);
+// 				item.nameTag = key;
+// 				container.addItem(item);
+// 			});
+// 		}
+// 		case MinecraftItemTypes.Stick: {
+// 			itemsFunctions[itemStack.nameTag ?? ""]?.(source);
+// 		}
+// 	}
+// });
+// world.beforeEvents.playerBreakBlock.subscribe((event) => {
+// 	event.cancel = true;
+// });
 try {
     world.scoreboard.addObjective("test");
 }
 catch (e) {
 }
+let i = 0;
+const locations = [{ x: 449, y: 71, z: 193 }, { x: 449, y: 72, z: 165 }, { x: 476, y: 72, z: 176 }, { x: 444, y: 72, z: 169 }, { x: 455, y: 73, z: 160 }, { x: 460, y: 71, z: 178 }, { x: 453, y: 72, z: 172 }, { x: 465, y: 74, z: 155 }, { x: 479, y: 69, z: 167 }, { x: 444, y: 72, z: 182 }, { x: 467, y: 72, z: 172 }, { x: 480, y: 71, z: 200 }, { x: 460, y: 71, z: 193 }, { x: 441, y: 72, z: 160 }, { x: 423, y: 71, z: 182 }];
+system.afterEvents.scriptEventReceive.subscribe(async (event) => {
+    const { id, message, sourceEntity } = event;
+    if (id !== "patches:async")
+        return;
+    console.warn("Start getBlockArrayAsync test");
+    if (!(sourceEntity instanceof Player))
+        return;
+    const date = Date.now();
+    await getBlockArrayAsync(overworld, locations, (blocks) => {
+        const permutation = BlockPermutation.resolve(!(i++ % 2) ? MinecraftBlockTypes.EmeraldBlock : MinecraftItemTypes.GoldBlock);
+        blocks.forEach((block) => {
+            block.setPermutation(permutation);
+        });
+    });
+    console.warn("Time getBlockArrayAsync:", Date.now() - date);
+});
 system.afterEvents.scriptEventReceive.subscribe((event) => {
     const { id, message, sourceEntity } = event;
     if (id !== "p:test")
@@ -143,3 +162,8 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
         }
     }
 });
+customEvents.beforeItemUseOnFirst.subscribe((event) => {
+    event.cancel = true;
+    console.warn("beforeItemUseOnFirst", event.source.name);
+});
+//# sourceMappingURL=index.js.map

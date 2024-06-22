@@ -306,3 +306,4 @@ export class Vector {
         return new Vector(max.x, max.y, max.z);
     }
 }
+//# sourceMappingURL=vector.js.map

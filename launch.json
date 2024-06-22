@@ -1,0 +1,15 @@
+{
+	"version": "0.3.0",
+	"configurations": [
+		{
+			"type": "minecraft-js",
+			"request": "attach",
+			"name": "Wait for Minecraft Debug Connections",
+			"mode": "listen",
+			"localRoot": "${workspaceFolder}/scripts",
+			"port": 19144,
+			"targetModuleUuid": "99115dac-b3f6-4206-91dd-948ee741e4a8",
+			"sourceMapRoot": "${workspaceFolder}/scripts"
+		}
+	]
+}

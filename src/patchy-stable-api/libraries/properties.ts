@@ -427,6 +427,7 @@ class EntityStorageManager extends DynamicPropertyManager {
 		if (typeof key !== 'string') throw new Error('key is not of type string');
 		const objective = this.scoresStorage[key]?.objective ?? world.scoreboard.getObjective(key);
 		objective?.removeParticipant(this.root);
+		this.scoresStorage[key] ??= {};
 		this.scoresStorage[key].gotten = true;
 		delete this.scoresStorage[key].value;
 	}

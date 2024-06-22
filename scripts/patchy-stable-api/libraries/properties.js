@@ -483,6 +483,7 @@ class EntityStorageManager extends DynamicPropertyManager {
             throw new Error('key is not of type string');
         const objective = this.scoresStorage[key]?.objective ?? world.scoreboard.getObjective(key);
         objective?.removeParticipant(this.root);
+        this.scoresStorage[key] ??= {};
         this.scoresStorage[key].gotten = true;
         delete this.scoresStorage[key].value;
     }
@@ -582,3 +583,4 @@ class WorldStorageManager extends DynamicPropertyManager {
 }
 ;
 export const storage = new Storage();
+//# sourceMappingURL=properties.js.map
