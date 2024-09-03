@@ -22,4 +22,3 @@ export const customEvents = {
 	scoreChanged: scoreChanged,
 	beforeItemUseOnFirst: beforeItemUseOnFirst,
 } as const;
-

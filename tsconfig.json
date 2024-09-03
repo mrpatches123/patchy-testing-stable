@@ -24,7 +24,12 @@
 		"removeComments": false,
 		"skipLibCheck": true,
 		"preserveConstEnums": true,
-		"isolatedModules": true
+		"isolatedModules": true,
+		"plugins": [
+			{
+				"name": "my-plugin"
+			}
+		]
 	},
 	"include": [
 		"src/**/*.ts",
@@ -32,7 +37,8 @@
 	],
 	"exclude": [
 		"node_modules/**/*",
-		"scripts/**/*"
+		"scripts/**/*",
+		"./**/typscript_lang/**/*"
 	],
 	"compileOnSave": false
 }

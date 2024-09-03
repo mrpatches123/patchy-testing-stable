@@ -1,0 +1,8 @@
+{
+	"name": "my-plugin",
+	"version": "0.0.1",
+	"main": "./out",
+	"dependencies": {
+		"typescript": "^4.4.3"
+	}
+}
