@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { Player } from "@minecraft/server";
 
 type Command = {
@@ -15,6 +16,8 @@ class CommandHandler {
 	}
 }
 const commandHandler = new CommandHandler();
+
 commandHandler.registerCommand("test", {
+	// @ts-ignore
 	[(player) => false]: 2
 });
