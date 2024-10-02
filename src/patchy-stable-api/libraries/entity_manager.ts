@@ -1,6 +1,7 @@
 import { Dimension, Entity, EntityDieAfterEvent, EntityDieAfterEventSignal, EntityHealthChangedAfterEventSignal, EntityHitEntityAfterEventSignal, EntityHurtAfterEvent, EntityHurtAfterEventSignal, EntityLoadAfterEventSignal, EntityRemoveAfterEvent, EntityRemoveBeforeEvent, EntitySpawnAfterEvent, ProjectileHitEntityAfterEvent, ProjectileHitEntityAfterEventSignal, Vector3, world, WorldAfterEvents } from "@minecraft/server";
 import { storage } from "./properties";
 import { overworld } from "./utilities";
+
 const worldStorage = storage.get();
 const EntityEvents = {
 	entityDie: { event: world.afterEvents.entityDie, entityKey: 'deadEntity' },

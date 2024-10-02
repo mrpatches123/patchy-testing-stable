@@ -1082,4 +1082,3 @@ export var MinecraftBlockTypes;
     MinecraftBlockTypes["YellowTerracotta"] = "minecraft:yellow_terracotta";
     MinecraftBlockTypes["YellowWool"] = "minecraft:yellow_wool";
 })(MinecraftBlockTypes || (MinecraftBlockTypes = {}));
-//# sourceMappingURL=mojang-block.js.map

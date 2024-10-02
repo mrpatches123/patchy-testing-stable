@@ -9,4 +9,3 @@ export var MinecraftCooldownCategoryTypes;
     MinecraftCooldownCategoryTypes["Shield"] = "minecraft:shield";
     MinecraftCooldownCategoryTypes["WindCharge"] = "minecraft:wind_charge";
 })(MinecraftCooldownCategoryTypes || (MinecraftCooldownCategoryTypes = {}));
-//# sourceMappingURL=mojang-cooldownCategory.js.map

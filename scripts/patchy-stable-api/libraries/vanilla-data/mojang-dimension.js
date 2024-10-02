@@ -7,4 +7,3 @@ export var MinecraftDimensionTypes;
     MinecraftDimensionTypes["Overworld"] = "minecraft:overworld";
     MinecraftDimensionTypes["TheEnd"] = "minecraft:the_end";
 })(MinecraftDimensionTypes || (MinecraftDimensionTypes = {}));
-//# sourceMappingURL=mojang-dimension.js.map

@@ -48,4 +48,3 @@ export class PlayerJoinedEvent {
     }
 }
 export const playerJoined = new PlayerJoinedEvent();
-//# sourceMappingURL=player_joined.js.map

@@ -166,4 +166,3 @@ customEvents.beforeItemUseOnFirst.subscribe((event) => {
     event.cancel = true;
     console.warn("beforeItemUseOnFirst", event.source.name);
 });
-//# sourceMappingURL=index.js.map

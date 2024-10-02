@@ -17,4 +17,3 @@ export class BooleanDynamicPropertyChangedEvent extends StorageChangedEventTempl
     }
 }
 export const booleanDynamicPropertyChanged = new BooleanDynamicPropertyChangedEvent();
-//# sourceMappingURL=boolean_dynamic_property_changed.js.map

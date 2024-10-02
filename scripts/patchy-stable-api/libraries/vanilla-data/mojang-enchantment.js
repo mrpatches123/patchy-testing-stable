@@ -42,4 +42,3 @@ export var MinecraftEnchantmentTypes;
     MinecraftEnchantmentTypes["Unbreaking"] = "unbreaking";
     MinecraftEnchantmentTypes["Vanishing"] = "vanishing";
 })(MinecraftEnchantmentTypes || (MinecraftEnchantmentTypes = {}));
-//# sourceMappingURL=mojang-enchantment.js.map

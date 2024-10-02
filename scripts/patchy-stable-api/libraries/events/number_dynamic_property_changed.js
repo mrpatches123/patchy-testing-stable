@@ -17,4 +17,3 @@ export class NumberDynamicPropertyChangedEvent extends StorageChangedEventTempla
     }
 }
 export const numberDynamicPropertyChanged = new NumberDynamicPropertyChangedEvent();
-//# sourceMappingURL=number_dynamic_property_changed.js.map

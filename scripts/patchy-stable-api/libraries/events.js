@@ -21,7 +21,3 @@ export const customEvents = {
     scoreChanged: scoreChanged,
     beforeItemUseOnFirst: beforeItemUseOnFirst,
 };
-function jkwdjwdkj() {
-}
-jkwdjwdkj.caller;
-//# sourceMappingURL=events.js.map

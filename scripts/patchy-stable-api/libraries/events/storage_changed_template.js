@@ -19,4 +19,3 @@ export class StorageChangedEventTemplate {
         delete this.subscriptions[id];
     }
 }
-//# sourceMappingURL=storage_changed_template.js.map

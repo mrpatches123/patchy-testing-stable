@@ -12,6 +12,9 @@ export const content = {
         chunkString(messages.map(message => JSON.stringify(message, (key, value) => (value instanceof Function) ? '<f>' : value, 4)).join(' '), 500).forEach(message => world.sendMessage(message));
     }
 };
+export function toSnakeCase(str) {
+    return str.replace(/^[A-Z]/, (s) => s.toLowerCase()).replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`).replace(/[^A-Za-z0-9]+/g, "_");
+}
 export function toProperCaseTypeId(typeId) {
     return toProperCase(typeId.replace(/\w+:/, ""));
 }
@@ -714,4 +717,3 @@ export async function showFormAwaitPlayerNotBusy(receiver, form) {
         world.beforeEvents.playerLeave.unsubscribe(leaveCallback);
     return response;
 }
-//# sourceMappingURL=utilities.js.map

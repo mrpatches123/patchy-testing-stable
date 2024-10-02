@@ -17,4 +17,3 @@ export class StringDynamicPropertyChangedEvent extends StorageChangedEventTempla
     }
 }
 export const stringDynamicPropertyChanged = new StringDynamicPropertyChangedEvent();
-//# sourceMappingURL=string_dynamic_property_changed.js.map

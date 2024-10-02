@@ -1244,4 +1244,3 @@ export var MinecraftItemTypes;
     MinecraftItemTypes["ZombieSpawnEgg"] = "minecraft:zombie_spawn_egg";
     MinecraftItemTypes["ZombieVillagerSpawnEgg"] = "minecraft:zombie_villager_spawn_egg";
 })(MinecraftItemTypes || (MinecraftItemTypes = {}));
-//# sourceMappingURL=mojang-item.js.map

@@ -21,4 +21,3 @@ export var MinecraftFeatureTypes;
     MinecraftFeatureTypes["TrialChambers"] = "minecraft:trial_chambers";
     MinecraftFeatureTypes["Village"] = "minecraft:village";
 })(MinecraftFeatureTypes || (MinecraftFeatureTypes = {}));
-//# sourceMappingURL=mojang-feature.js.map

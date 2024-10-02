@@ -68,4 +68,3 @@ export class BeforeItemUseOnFirstEvent {
     }
 }
 export const beforeItemUseOnFirst = new BeforeItemUseOnFirstEvent();
-//# sourceMappingURL=before_item_use_on_first.js.map

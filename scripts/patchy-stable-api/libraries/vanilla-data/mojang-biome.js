@@ -90,4 +90,3 @@ export var MinecraftBiomeTypes;
     MinecraftBiomeTypes["WarmOcean"] = "minecraft:warm_ocean";
     MinecraftBiomeTypes["WarpedForest"] = "minecraft:warped_forest";
 })(MinecraftBiomeTypes || (MinecraftBiomeTypes = {}));
-//# sourceMappingURL=mojang-biome.js.map

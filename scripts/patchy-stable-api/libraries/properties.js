@@ -583,4 +583,3 @@ class WorldStorageManager extends DynamicPropertyManager {
 }
 ;
 export const storage = new Storage();
-//# sourceMappingURL=properties.js.map

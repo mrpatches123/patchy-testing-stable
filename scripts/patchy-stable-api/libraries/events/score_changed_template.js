@@ -19,4 +19,3 @@ export class ScoreChangedEventTemplate {
         delete this.subscriptions[id];
     }
 }
-//# sourceMappingURL=score_changed_template.js.map
