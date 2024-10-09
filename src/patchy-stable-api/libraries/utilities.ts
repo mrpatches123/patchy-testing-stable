@@ -599,11 +599,13 @@ export async function getBlocksAsync(dimension: Dimension, blockLocations: Vecto
  * @returns {() => void} cancel() run to cancel
  */
 export function systemRunIntervalAwaitCallback(callback: () => void | Promise<void>, tickDelay = 0): () => void {
-
+	let stop = false;
 	let currentId: number | undefined;
 	const run = async () => {
+		if (stop) return;
 		try {
 			await callback();
+			if (stop) return;
 			currentId = system.runTimeout(run, tickDelay);
 		} catch (error: any) {
 			console.warn("Error below stack: ", error.stack);
@@ -612,6 +614,7 @@ export function systemRunIntervalAwaitCallback(callback: () => void | Promise<vo
 	};
 	currentId = system.run(run);
 	return () => {
+		stop = true;
 		if (isDefined(currentId)) system.clearRun(currentId);
 	};
 }
