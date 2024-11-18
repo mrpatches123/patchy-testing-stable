@@ -41,7 +41,7 @@ export function iterateObject<T extends Record<string, any>>(obj: T, callback: (
 		callback(key, obj[key], i++);
 	}
 }
-export function isDefined<T>(value: T | undefined): value is T {
+export function isDefined<T>(value: T | undefined | null): value is T {
 	return value !== undefined && value !== null && typeof value !== 'number' || Number.isFinite(value);
 }
 export function isVector3(value: any): value is Vector3 {
