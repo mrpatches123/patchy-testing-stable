@@ -11,7 +11,7 @@ export class Iterate {
             thisIterate.entities = thisIterate.entitiesRefresh();
             for (let i = 0;; i++) {
                 const mod = i % thisIterate.entities.length;
-                if (mod)
+                if (!thisIterate.entities.length || !mod)
                     thisIterate.entities = thisIterate.entitiesRefresh();
                 yield thisIterate.entities[mod];
             }

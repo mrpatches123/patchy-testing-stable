@@ -13,7 +13,7 @@ export declare function toProperCase(string: string): string;
 export declare function toCamelCase(str: string): string;
 export declare function fixPlayerScore(player: Player): void;
 export declare function iterateObject<T extends Record<string, any>>(obj: T, callback: (key: keyof T, value: T[keyof T], i: number) => void): void;
-export declare function isDefined<T>(value: T | undefined): value is T;
+export declare function isDefined<T>(value: T | undefined | null): value is T;
 export declare function isVector3(value: any): value is Vector3;
 export declare function chunkString(str: string, length: number): string[];
 export declare const facingDirectionToVector3: Record<number, Vector3>;

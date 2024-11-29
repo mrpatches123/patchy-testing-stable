@@ -639,10 +639,15 @@ export async function getBlocksAsync(dimension, blockLocations, callback, tickin
  * @returns {() => void} cancel() run to cancel
  */
 export function systemRunIntervalAwaitCallback(callback, tickDelay = 0) {
+    let stop = false;
     let currentId;
     const run = async () => {
+        if (stop)
+            return;
         try {
             await callback();
+            if (stop)
+                return;
             currentId = system.runTimeout(run, tickDelay);
         }
         catch (error) {
@@ -652,6 +657,7 @@ export function systemRunIntervalAwaitCallback(callback, tickDelay = 0) {
     };
     currentId = system.run(run);
     return () => {
+        stop = true;
         if (isDefined(currentId))
             system.clearRun(currentId);
     };
