@@ -10,4 +10,5 @@ export declare const customEvents: {
     readonly booleanDynamicPropertyChanged: import("./events/boolean_dynamic_property_changed.js").BooleanDynamicPropertyChangedEvent;
     readonly scoreChanged: import("./events/score_changed.js").BooleanDynamicPropertyChangedEvent;
     readonly beforeItemUseOnFirst: import("./events/before_item_use_on_first.js").BeforeItemUseOnFirstEvent;
+    readonly beforePlayerInteractWithEntityFirst: import("./events/before_player_interact_with_entity_first.js").BeforePlayerInteractWithEntityFirstEvent;
 };

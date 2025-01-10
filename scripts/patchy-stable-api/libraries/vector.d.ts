@@ -184,4 +184,5 @@ export declare class Vector {
     static areaBetweenFloored(a: Vector3, b: Vector3): number;
     static minVectors(vectors: Vector3[]): Vector;
     static maxVectors(vectors: Vector3[]): Vector;
+    static fromVector3(vector: Vector3): Vector;
 }
