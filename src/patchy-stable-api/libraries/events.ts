@@ -8,6 +8,7 @@ import { booleanDynamicPropertyChanged } from './events/boolean_dynamic_property
 import { scoreChanged } from './events/score_changed.js';
 import { jsonDynamicPropertyChanged } from './events/json_dynamic_property_changed.js';
 import { beforeItemUseOnFirst } from './events/before_item_use_on_first.js';
+import { beforePlayerInteractWithEntityFirst } from './events/before_player_interact_with_entity_first.js';
 export { StorageChangedType } from './events/storage_changed.js';
 
 export const customEvents = {
@@ -21,4 +22,5 @@ export const customEvents = {
 	booleanDynamicPropertyChanged: booleanDynamicPropertyChanged,
 	scoreChanged: scoreChanged,
 	beforeItemUseOnFirst: beforeItemUseOnFirst,
+	beforePlayerInteractWithEntityFirst: beforePlayerInteractWithEntityFirst
 } as const;

@@ -1,11 +1,11 @@
 {
 	"type": "module",
 	"dependencies": {
-		"my-plugin": "file:./src/patchy-stable-api/typscript_lang/",
-		"@minecraft/server": "^1.8.0",
+		"@minecraft/server": "^1.16.0",
 		"@minecraft/server-ui": "^1.1.0",
 		"@minecraft/vanilla-data": "^1.20.80",
 		"fs": "^0.0.1-security",
+		"my-plugin": "file:./src/patchy-stable-api/typscript_lang/",
 		"path": "^0.12.7"
 	},
 	"scripts": {
