@@ -21,7 +21,7 @@ class Form {
 	/**
 	 * @type {boolean | -1 | 0 | 1 | 2 | 3}
 	 */
-	protected lastCallCallbackable: boolean | -1 | 0 | 1 | 2 | 3 = false;
+	protected lastCallCallbackable: boolean | -1 | 0 | 1 | 2 | 3 | 4 | 5 = false;
 	/**
 	 * Sets the callback for when the user closes the form (cannot call callback after this method is called)
 	 * @param {(receiver: Player) => void} callback
@@ -273,8 +273,11 @@ enum LastCallCallbackable {
 	dropdown = 0,
 	slider = 1,
 	textFeild = 2,
-	toggle = 3
+	toggle = 3,
+	dropdownElementsWithCallback = 4,
+	dropdownElementsWithoutCallback = 5
 }
+type Element = { method: Function, params: any[]; };
 /**
  * This class basically controls when callback can be called for callbackable elements
  */
@@ -286,11 +289,14 @@ class ModalFormWithoutCallback extends Form {
 	/**
 	 * @type {(((receiver: Player, data: string | number | boolean, i: number) => void) | undefined)[]}
 	 */
-	protected callbacks: (((receiver: Player, data: string | number | boolean, i: number) => void) | undefined)[] = [];
+	protected callbacks: ((((receiver: Player, data: string | number | boolean, i: number) => void) | undefined)
+		| { total?: ((receiver: Player, data: string | number | boolean, i: number) => void) | undefined, elements?: ((receiver: Player, i: number, j: number) => void)[]; }
+	)[] = [];
 	/**
 	 * @type {LastCallCallbackable}
 	 */
-	protected lastCallCallbackable = LastCallCallbackable.none;
+	protected lastCallCallbackable: LastCallCallbackable = LastCallCallbackable.none;
+	protected formData: Element[] = [];
 	constructor() {
 		super();
 	}
@@ -301,7 +307,7 @@ class ModalFormWithoutCallback extends Form {
 	 */
 	title(...args: Parameters<ModalFormData['title']>): this {
 		this.lastCallCallbackable = LastCallCallbackable.none;
-		this.root.title(...args);
+		this.formData.push({ method: this.root.title, params: args });
 		return this;
 	}
 	/**
@@ -309,10 +315,16 @@ class ModalFormWithoutCallback extends Form {
 	 * @param {...Parameters<ModalFormData['dropdown']>} args
 	 * @returns {ModalFormWithCallback<number>}
 	 */
-	dropdown(...args: Parameters<ModalFormData['dropdown']>): ModalFormWithCallback<number> {
-		this.lastCallCallbackable = LastCallCallbackable.dropdown;
-		this.root.dropdown(...args);
-		this.callbacks.push(undefined);
+	dropdown(label: Parameters<ModalFormData['dropdown']>[0], defaultIndex?: Parameters<ModalFormData['dropdown']>[2], options?: Parameters<ModalFormData['dropdown']>[1]): ModalFormWithCallback<number> {
+
+		if (options) {
+			this.formData.push({ method: this.root.dropdown, params: [label, options, defaultIndex ?? 0] });
+			this.lastCallCallbackable = LastCallCallbackable.dropdown;
+		} else {
+			this.formData.push({ method: this.root.dropdown, params: [label, [], defaultIndex ?? 0] });
+			this.lastCallCallbackable = LastCallCallbackable.dropdownElementsWithoutCallback;
+		}
+		this.callbacks.push({ total: undefined, elements: [] });
 		return this as unknown as ModalFormWithCallback<number>;
 	}
 	/**
@@ -322,7 +334,7 @@ class ModalFormWithoutCallback extends Form {
 	 */
 	slider(...args: Parameters<ModalFormData['slider']>): ModalFormWithCallback<number> {
 		this.lastCallCallbackable = LastCallCallbackable.slider;
-		this.root.slider(...args);
+		this.formData.push({ method: this.root.slider, params: args });
 		this.callbacks.push(undefined);
 		return this as unknown as ModalFormWithCallback<number>;
 	}
@@ -333,7 +345,7 @@ class ModalFormWithoutCallback extends Form {
 	 */
 	textField(...args: Parameters<ModalFormData['textField']>): ModalFormWithCallback<string> {
 		this.lastCallCallbackable = LastCallCallbackable.textFeild;
-		this.root.textField(...args);
+		this.formData.push({ method: this.root.textField, params: args });
 		this.callbacks.push(undefined);
 		return this as unknown as ModalFormWithCallback<string>;
 	}
@@ -344,7 +356,7 @@ class ModalFormWithoutCallback extends Form {
 	 */
 	toggle(...args: Parameters<ModalFormData['toggle']>): ModalFormWithCallback<boolean> {
 		this.lastCallCallbackable = LastCallCallbackable.toggle;
-		this.root.toggle(...args);
+		this.formData.push({ method: this.root.toggle, params: args });
 		this.callbacks.push(undefined);
 		return this as unknown as ModalFormWithCallback<boolean>;
 	}
@@ -356,6 +368,7 @@ class ModalFormWithoutCallback extends Form {
 	async show(receiver: Player) {
 		try {
 			this.lastCallCallbackable = LastCallCallbackable.none;
+			this.build();
 			const response = await this.root.show(receiver);
 			const { canceled, cancelationReason, formValues = [] } = response;
 			if (canceled) {
@@ -369,6 +382,11 @@ class ModalFormWithoutCallback extends Form {
 				}
 			} else {
 				this.callbacks.forEach((callback, i) => {
+					if (!(callback instanceof Function) && callback instanceof Object) {
+						callback?.total?.(receiver, formValues[i], i);
+						callback?.elements?.[formValues[i] as unknown as number]?.(receiver, i, formValues[i] as unknown as number);
+						return;
+					}
 					callback?.(receiver, formValues[i], i);
 				});
 			}
@@ -387,6 +405,7 @@ class ModalFormWithoutCallback extends Form {
 		try {
 			this.lastCallCallbackable = LastCallCallbackable.none;
 			let response: ModalFormResponse;
+			this.build();
 			while (true) {
 				if (!receiver || !receiver.isValid()) return;
 				response = await this.root.show(receiver);
@@ -404,6 +423,11 @@ class ModalFormWithoutCallback extends Form {
 				}
 			} else {
 				this.callbacks.forEach((callback, i) => {
+					if (!(callback instanceof Function) && callback instanceof Object) {
+						callback?.total?.(receiver, formValues[i], i);
+						callback?.elements?.[formValues[i] as unknown as number]?.(receiver, i, formValues[i] as unknown as number);
+						return;
+					}
 					callback?.(receiver, formValues[i], i);
 				});
 			}
@@ -413,9 +437,32 @@ class ModalFormWithoutCallback extends Form {
 			throw error;
 		}
 	}
+	protected build() {
+		this.formData.forEach((element) => {
+			element.method.apply(this.root, element.params);
+		});
+	}
+	submitButton(...args: Parameters<ModalFormData['submitButton']>): this {
+		this.lastCallCallbackable = LastCallCallbackable.none;
+		this.root.submitButton(...args);
+		return this;
+	}
 
 }
-export class ModalFormWithCallback<lastCallbackData extends string | number | boolean> extends ModalFormWithoutCallback {
+export class ModalFormDropdownWithoutCallback extends ModalFormWithoutCallback {
+	constructor() {
+		super();
+	}
+	addSection(sectionText: string): ModalFormWithCallback<string> {
+		if (this.lastCallCallbackable !== LastCallCallbackable.dropdownElementsWithoutCallback) {
+			throw new Error("Cannot add section unless a dropdown was initailised");
+		}
+		this.formData[this.formData.length - 1]!.params[1]!.push(sectionText);
+		this.lastCallCallbackable = LastCallCallbackable.dropdownElementsWithCallback;
+		return this as any;
+	}
+}
+export class ModalFormWithCallback<lastCallbackData extends string | number | boolean> extends ModalFormDropdownWithoutCallback {
 	constructor() {
 		super();
 	}
@@ -425,14 +472,28 @@ export class ModalFormWithCallback<lastCallbackData extends string | number | bo
 	 * @returns {ModalFormWithoutCallback}
 	 */
 	callback(callback: (receiver: Player, data: lastCallbackData, i: number) => void): ModalFormWithoutCallback {
+		const end = this.callbacks.length - 1;
 		if (this.lastCallCallbackable === LastCallCallbackable.none) throw new Error('Cannot add callback after non-callbackable method');
+		if (this.lastCallCallbackable === LastCallCallbackable.dropdownElementsWithCallback) {
+
+			if ((this.callbacks[end]) instanceof Function) throw new Error("dropdownElementsWithCallback but not an Object in callbacks");
+			this.callbacks[end] ??= {};
+			this.callbacks[end].elements ??= [];
+			this.callbacks[end].elements.push(callback as any);
+			return this;
+		} else if (this.lastCallCallbackable === LastCallCallbackable.dropdown) {
+			if ((this.callbacks[end]) instanceof Function) throw new Error("dropdown but not an Object in callbacks");
+			this.callbacks[end] ??= {};
+			this.callbacks[end].total = callback as any;
+		}
 		this.callbacks[this.callbacks.length - 1] = callback as any;
 		this.lastCallCallbackable = LastCallCallbackable.none;
 		return this;
 	};
 
 }
-export class ModalForm extends ModalFormWithCallback<string | number | boolean> implements ModalFormData {
+
+export class ModalForm extends ModalFormWithCallback<string | number | boolean> {
 	constructor() {
 		super();
 	}

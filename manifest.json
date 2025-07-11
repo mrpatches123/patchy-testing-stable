@@ -40,18 +40,10 @@
 		},
 		{
 			"module_name": "@minecraft/server",
-			"version": "1.8.0"
+			"version": "1.17.0"
 		}
 	],
 	"capabilities": [
 		"script_eval"
-	],
-	"metadata": {
-		"generated_with": {
-			"bridge": [
-				"1.8.4",
-				"1.8.5"
-			]
-		}
-	}
+	]
 }

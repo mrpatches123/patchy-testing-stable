@@ -1,15 +1,30 @@
-import { Entity, Player, Scoreboard, ScoreboardObjective, Vector3, World, world } from "@minecraft/server";
+import { ContainerSlot, Entity, ItemStack, Player, Scoreboard, ScoreboardObjective, Vector3, World, world } from "@minecraft/server";
 import { chunkString, isDefined, isVector3 } from "./utilities";
 import { StorageChangedType, customEvents } from "./events";
 export class Storage {
-	protected managers: Record<string, EntityStorageManager | WorldStorageManager> = { 'world': new WorldStorageManager(world) };
+	protected managers: Record<string, EntityStorageManager | WorldStorageManager | ItemStorageManager> = { 'world': new WorldStorageManager(world) };
 	get(): WorldStorageManager;
 	get(target: World): WorldStorageManager;
 	get(target: Entity): EntityStorageManager;
 	get(target: Player): EntityStorageManager;
-	get<T extends Entity | Player | World | undefined | void>(target?: T): T extends Player | Entity ? EntityStorageManager : WorldStorageManager {
+	get(target: ItemStack): ItemStorageManager;
+	get(target: ContainerSlot): ItemStorageManager;
+	get<T extends Entity | Player | World | ItemStack | ContainerSlot | undefined | void>(target?: T): T extends Player | Entity ? EntityStorageManager : T extends ItemStack | ContainerSlot ? ItemStorageManager : WorldStorageManager {
 		if (!target) return this.managers['world'] as any;
 		if (target instanceof World) return this.managers['world'] as any;
+		if (target instanceof ItemStack || target instanceof ContainerSlot) {
+			let itemId = "item:" + <number | undefined>target.getDynamicProperty('itemId');
+			if (typeof itemId !== "number") {
+				const currentItemId = world.getDynamicProperty("itemId") ?? 0;
+
+				itemId = "item:" + currentItemId;
+				target.setDynamicProperty('itemId', 1);
+			} else {
+				target.setDynamicProperty('itemId', itemId + 1);
+			}
+			this.managers[itemId] ??= new ItemStorageManager(target);
+			return this.managers[itemId] as any;
+		}
 		const { id } = target;
 		this.managers[id] ??= new EntityStorageManager(target);
 		return this.managers[id] as any;
@@ -44,8 +59,8 @@ try {
 const chunkAmountJSON = 10922;
 class DynamicPropertyManager {
 	dynamicProperties: Record<string, { type?: DynamicPropertyTypes, value?: number | boolean | Vector3 | string; gotten?: boolean; }> = {};
-	protected root: Player | Entity | World;
-	constructor(root: Player | Entity | World) {
+	protected root: Player | Entity | World | ContainerSlot | ItemStack;
+	constructor(root: Player | Entity | World | ContainerSlot | ItemStack) {
 		this.root = root;
 	}
 	setString(key: string, value?: string) {
@@ -376,6 +391,17 @@ class DynamicPropertyManager {
 			}
 		});
 	}
+}
+class ItemStorageManager extends DynamicPropertyManager {
+	protected root: ItemStack | ContainerSlot;
+	constructor(root: ItemStack | ContainerSlot) {
+		super(root);
+		this.root = root;
+	}
+	clearAll() {
+		this.clearAllDynamicProperties();
+	}
+
 }
 class EntityStorageManager extends DynamicPropertyManager {
 
