@@ -3,7 +3,6 @@ import { ActionForm, MessageForm, ModalForm } from "./patchy-stable-api/librarie
 import { MinecraftBlockTypes, MinecraftEntityTypes, MinecraftItemTypes } from "./patchy-stable-api/libraries/vanilla-data";
 import { storage } from "./patchy-stable-api/libraries/properties";
 import { getBlockArrayAsync, overworld } from "patchy-stable-api/libraries/utilities";
-import { customEvents } from "patchy-stable-api/libraries/events";
 import { Iterate } from "patchy-stable-api/libraries/iterate";
 const pigIterate = new Iterate(() => overworld.getEntities({ type: MinecraftEntityTypes.Pig }));
 system.runInterval(() => {
@@ -42,14 +41,14 @@ const itemsFunctions = {
     },
     "modal": (source) => {
         const form = new ModalForm();
-        form.slider("test0", 0, 10, 1)
+        form.slider("test0", 0, 10)
             .callback((receiver, number) => console.warn("test0", number))
             .dropdown("test1", ["a", "b", "c"])
             .callback((receiver, number) => console.warn("test1", number))
             .textField("test2_NONE", "default")
             .textField("test3", "default")
             .callback((receiver, text) => console.warn("test3", text))
-            .toggle("test4", false)
+            .toggle("test4")
             .callback((receiver, boolean) => console.warn("test4", boolean))
             .busyCallback(() => console.warn("busy"))
             .closeCallback(() => console.warn("closed"))
@@ -170,8 +169,4 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
             break;
         }
     }
-});
-customEvents.beforeItemUseOnFirst.subscribe((event) => {
-    event.cancel = true;
-    console.warn("beforeItemUseOnFirst", event.source.name);
 });

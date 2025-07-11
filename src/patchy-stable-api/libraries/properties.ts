@@ -1,4 +1,4 @@
-import { Entity, Player, Scoreboard, ScoreboardObjective, Vector3, World, world } from "@minecraft/server";
+import { Entity, Player, Scoreboard, ScoreboardObjective, system, Vector3, World, world } from "@minecraft/server";
 import { chunkString, isDefined, isVector3 } from "./utilities";
 import { StorageChangedType, customEvents } from "./events";
 export class Storage {
@@ -15,8 +15,8 @@ export class Storage {
 		return this.managers[id] as any;
 	}
 	constructor() {
-		world.afterEvents.playerLeave.subscribe(({ playerId }) => {
-			delete this.managers[playerId];
+		world.beforeEvents.playerLeave.subscribe(({ player }) => {
+			delete this.managers[player.id];
 		});
 		world.afterEvents.entityRemove.subscribe(({ removedEntityId }) => {
 			delete this.managers[removedEntityId];
@@ -35,12 +35,15 @@ enum DynamicPropertyTypes {
 	json = 'json',
 }
 const fixObjectiveName = '$entity$_$storage234';
-let fixObjective: ScoreboardObjective;
-try {
-	fixObjective = world.scoreboard.addObjective(fixObjectiveName);
-} catch {
-	fixObjective = world.scoreboard.getObjective(fixObjectiveName)!;
-}
+let fixObjective: ScoreboardObjective | undefined;
+world.afterEvents.worldLoad.subscribe(() => {
+	try {
+		fixObjective = world.scoreboard.addObjective(fixObjectiveName);
+	} catch {
+		fixObjective = world.scoreboard.getObjective(fixObjectiveName)!;
+	}
+});
+
 const chunkAmountJSON = 10922;
 class DynamicPropertyManager {
 	dynamicProperties: Record<string, { type?: DynamicPropertyTypes, value?: number | boolean | Vector3 | string; gotten?: boolean; }> = {};
@@ -407,6 +410,7 @@ class EntityStorageManager extends DynamicPropertyManager {
 				if (!objective) throw new Error(`objective doesn't exist: ${key}`);
 			}
 			this.scoresStorage[key].gotten = true;
+			if (!fixObjective) throw new Error("To early in exetcution");
 			if (!this.root.scoreboardIdentity) fixObjective.setScore(this.root, 0);
 			this.scoresStorage[key].value = objective.getScore(this.root);
 		}

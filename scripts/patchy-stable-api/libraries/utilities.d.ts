@@ -1,8 +1,9 @@
 import { Player, Vector3, ItemStack, Dimension, Entity, EntityQueryOptions, Block } from "@minecraft/server";
 import { ActionFormData, ActionFormResponse, MessageFormData, MessageFormResponse, ModalFormData, ModalFormResponse } from "@minecraft/server-ui";
-export declare const overworld: Dimension;
-export declare const nether: Dimension;
-export declare const end: Dimension;
+export declare let overworld: Dimension;
+export declare let nether: Dimension;
+export declare let end: Dimension;
+export declare let dimensions: Dimension[];
 export declare const content: {
     warn(...messages: any[]): void;
     chatFormat(...messages: any[]): void;
