@@ -1,17 +1,15 @@
 import { BlockPermutation, Player, system, world } from "@minecraft/server";
 import { ActionForm, MessageForm, ModalForm } from "./patchy-stable-api/libraries/form";
-import { MinecraftBlockTypes, MinecraftEntityTypes, MinecraftItemTypes } from "./patchy-stable-api/libraries/vanilla-data";
+import { MinecraftBlockTypes, MinecraftItemTypes } from "./patchy-stable-api/libraries/vanilla-data";
 import { storage } from "./patchy-stable-api/libraries/properties";
 import { getBlockArrayAsync, overworld } from "patchy-stable-api/libraries/utilities";
-import { Iterate } from "patchy-stable-api/libraries/iterate";
-const pigIterate = new Iterate(() => overworld.getEntities({ type: MinecraftEntityTypes.Pig }));
-system.runInterval(() => {
-    console.warn("Interval");
-    const pig = pigIterate.next();
-    if (!pig)
-        return;
-    console.warn(pig.id);
-}, 10);
+// const pigIterate = new Iterate(() => overworld.getEntities({ type: MinecraftEntityTypes.Pig }));
+// system.runInterval(() => {
+// 	console.warn("Interval");
+// 	const pig = pigIterate.next();
+// 	if (!pig) return;
+// 	console.warn(pig.id);
+// }, 10);
 const itemsFunctions = {
     "action": (source) => {
         const form = new ActionForm();
@@ -123,6 +121,8 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
             break;
         }
         case "get": {
+            const { numbers } = playerStorage;
+            console.warn(numbers.test2);
             sourceEntity.sendMessage(JSON.stringify({
                 score: playerStorage.scores.test ?? "null",
                 bool: playerStorage.booleans.test1 ?? "null",

@@ -5,13 +5,13 @@ import { storage } from "./patchy-stable-api/libraries/properties";
 import { getBlockArrayAsync, overworld } from "patchy-stable-api/libraries/utilities";
 import { customEvents } from "patchy-stable-api/libraries/events";
 import { Iterate } from "patchy-stable-api/libraries/iterate";
-const pigIterate = new Iterate(() => overworld.getEntities({ type: MinecraftEntityTypes.Pig }));
-system.runInterval(() => {
-	console.warn("Interval");
-	const pig = pigIterate.next();
-	if (!pig) return;
-	console.warn(pig.id);
-}, 10);
+// const pigIterate = new Iterate(() => overworld.getEntities({ type: MinecraftEntityTypes.Pig }));
+// system.runInterval(() => {
+// 	console.warn("Interval");
+// 	const pig = pigIterate.next();
+// 	if (!pig) return;
+// 	console.warn(pig.id);
+// }, 10);
 const itemsFunctions: Record<string, (source: Player) => void> = {
 	"action": (source) => {
 		const form = new ActionForm();
@@ -124,6 +124,8 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 			break;
 		}
 		case "get": {
+			const { numbers } = playerStorage;
+			console.warn(numbers.test2);
 			sourceEntity.sendMessage(JSON.stringify({
 				score: playerStorage.scores.test ?? "null",
 				bool: playerStorage.booleans.test1 ?? "null",
