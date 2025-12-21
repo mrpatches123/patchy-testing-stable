@@ -320,7 +320,4 @@ export class Vector {
 		}
 		return new Vector(max.x, max.y, max.z);
 	}
-	static fromVector3(vector: Vector3): Vector {
-		return new Vector(vector.x, vector.y, vector.z);
-	}
 }

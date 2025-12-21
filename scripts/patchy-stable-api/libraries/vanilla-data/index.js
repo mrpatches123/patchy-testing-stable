@@ -1,3 +1,4 @@
+export * from './index.js';
 export * from './mojang-biome.js';
 export * from './mojang-block.js';
 export * from './mojang-cameraPresets.js';
@@ -8,6 +9,3 @@ export * from './mojang-enchantment.js';
 export * from './mojang-entity.js';
 export * from './mojang-feature.js';
 export * from './mojang-item.js';
-export * from './mojang-potionEffect.js';
-export * from './mojang-potionLiquid.js';
-export * from './mojang-potionModifier.js';

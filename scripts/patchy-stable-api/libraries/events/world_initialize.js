@@ -21,7 +21,7 @@ export class WorldInitializeEvent {
                 const player = world.getPlayers()[0];
                 if (!player)
                     return;
-                const { successCount } = player.runCommand("testfor @s");
+                const { successCount } = await player.runCommandAsync("testfor @s");
                 if (!successCount)
                     return;
                 console.warn('world_initialised');

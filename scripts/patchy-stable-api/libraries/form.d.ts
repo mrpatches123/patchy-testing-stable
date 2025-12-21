@@ -85,24 +85,6 @@ declare class ActionFormWithoutCallback extends ButtonForm {
      * @returns {this}
      */
     body(...args: Parameters<ActionFormData['body']>): this;
-    /**
-     * Creates a section divder on the form of the form (cannot call callback after this method is called)
-     * @param {...Parameters<ActionFormData['divider']>} args
-     * @returns {this}
-     */
-    divider(...args: Parameters<ActionFormData['divider']>): this;
-    /**
-     * Creates a header on the form(cannot call callback after this method is called)
-     * @param {...Parameters<ActionFormData['header']>} args
-     * @returns {this}
-     */
-    header(...args: Parameters<ActionFormData['header']>): this;
-    /**
-     * Creates a label on the form (cannot call callback after this method is called)
-     * @param {...Parameters<ActionFormData['label']>} args
-     * @returns {this}
-     */
-    label(...args: Parameters<ActionFormData['label']>): this;
 }
 /**
  * A form that implements ActionFormData with callbacks for buttons, closing, and user busy that can be shown to a player with a title, body, and limitless buttons (callbackable)
@@ -226,30 +208,6 @@ declare class ModalFormWithoutCallback extends Form {
      * @returns {ModalFormWithCallback<boolean>}
      */
     toggle(...args: Parameters<ModalFormData['toggle']>): ModalFormWithCallback<boolean>;
-    /**
-     * Set the submitButton text of the form (cannot call callback after this method is called)
-     * @param {...Parameters<ModalFormData['submitButton']>} args
-     * @returns {this}
-     */
-    submitButton(...args: Parameters<ModalFormData['submitButton']>): this;
-    /**
-     * Create a divider on of the form (cannot call callback after this method is called)
-     * @param {...Parameters<ModalFormData['divider']>} args
-     * @returns {this}
-     */
-    divider(...args: Parameters<ModalFormData['divider']>): this;
-    /**
-     * Create a header on of the form (cannot call callback after this method is called)
-     * @param {...Parameters<ModalFormData['header']>} args
-     * @returns {this}
-     */
-    header(...args: Parameters<ModalFormData['header']>): this;
-    /**
-     * Create a label on of the form (cannot call callback after this method is called)
-     * @param {...Parameters<ModalFormData['label']>} args
-     * @returns {this}
-     */
-    label(...args: Parameters<ModalFormData['label']>): this;
     /**
      * Show the form to a player and runs a callback if available depending what action or state the player is in or inputed (cannot call callback after this method is called)
      * @param {Player} receiver

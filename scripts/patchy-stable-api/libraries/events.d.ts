@@ -9,4 +9,5 @@ export declare const customEvents: {
     readonly vector3DynamicPropertyChanged: import("./events/vector3_dynamic_property_changed.js").Vector3DynamicPropertyChangedEvent;
     readonly booleanDynamicPropertyChanged: import("./events/boolean_dynamic_property_changed.js").BooleanDynamicPropertyChangedEvent;
     readonly scoreChanged: import("./events/score_changed.js").BooleanDynamicPropertyChangedEvent;
+    readonly beforeItemUseOnFirst: import("./events/before_item_use_on_first.js").BeforeItemUseOnFirstEvent;
 };
