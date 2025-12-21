@@ -5,6 +5,7 @@ import { storage } from "./patchy-stable-api/libraries/properties";
 import { getBlockArrayAsync, overworld } from "patchy-stable-api/libraries/utilities";
 import { customEvents } from "patchy-stable-api/libraries/events";
 import { Iterate } from "patchy-stable-api/libraries/iterate";
+import { Timer } from "patchy-stable-api/libraries/time";
 // const pigIterate = new Iterate(() => overworld.getEntities({ type: MinecraftEntityTypes.Pig }));
 // system.runInterval(() => {
 // 	console.warn("Interval");
@@ -169,3 +170,15 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 		}
 	}
 });
+const cowIterate = new Iterate(() => overworld.getEntities({ type: MinecraftEntityTypes.Cow }));
+
+system.runInterval(() => {
+
+	const { value: cow, isLast, index: i } = cowIterate.nextWithData();
+	console.warn(JSON.stringify({ cow: cow?.id ?? "null", isLast }));
+	if (!cow || !cow.isValid) return;
+	let timer = Timer.getFromEntity(cow, "testTimer");
+	if (timer === false) return;
+	timer ??= new Timer().setCountDown(30000);
+	timer.saveToEntity(cow, "testTimer");
+}, 10);

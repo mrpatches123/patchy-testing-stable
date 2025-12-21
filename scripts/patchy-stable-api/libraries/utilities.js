@@ -23,10 +23,10 @@ export function toSnakeCase(str) {
     return str.replace(/^[A-Z]/, (s) => s.toLowerCase()).replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`).replace(/[^A-Za-z0-9]+/g, "_");
 }
 export function toProperCaseTypeId(typeId) {
-    return toProperCase(typeId.replace(/\w+:/, ""));
+    return toProperCase(typeId?.replace(/\w+:/, ""));
 }
 export function toProperCase(string) {
-    return string.replace(/[_.]/g, ' ').replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+    return string?.replace(/[_.]/g, ' ')?.replace(/\w\S*/g, (txt) => txt.charAt(0)?.toUpperCase() + txt?.substr(1)?.toLowerCase());
 }
 export function toCamelCase(str) {
     return str.replace(/(?:^\w|[A-Z]|(\b|_)\w)/g, (word, index) => word.toUpperCase()).replace(/[\s_]+/g, '').replace(/\w/, (world) => world.toLowerCase());

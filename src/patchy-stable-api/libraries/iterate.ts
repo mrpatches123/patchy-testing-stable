@@ -6,13 +6,13 @@ export class Iterate<T> {
 
 	private entitiesRefresh: () => T[];
 	private iterator = this.getIterator();
-
+	private i = 0;
 	private getIterator() {
 		const thisIterate = this;
 		return (function* () {
 			thisIterate.entities = thisIterate.entitiesRefresh();
-			for (let i = 0; ; i++) {
-				const mod = i % thisIterate.entities.length;
+			for (; ; thisIterate.i++) {
+				const mod = thisIterate.i % thisIterate.entities.length;
 				if (!thisIterate.entities.length || !mod) thisIterate.entities = thisIterate.entitiesRefresh();
 				yield thisIterate.entities[mod];
 			}
@@ -22,6 +22,11 @@ export class Iterate<T> {
 	public next() {
 		return this.iterator.next().value;
 	}
+	public nextWithData(): { value: T, isLast: boolean, index: number; } {
+		return {
+			value: this.iterator.next().value, isLast: !this.entities.length ? true : this.i % this.entities.length >= (this.entities.length - 1), index: this.i % this.entities.length
+		};
+	};
 	constructor(entitiesRefresh: () => T[]) {
 		this.entitiesRefresh = entitiesRefresh;
 	}

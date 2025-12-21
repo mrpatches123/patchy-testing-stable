@@ -26,10 +26,10 @@ export function toSnakeCase(str: string) {
 	return str.replace(/^[A-Z]/, (s) => s.toLowerCase()).replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`).replace(/[^A-Za-z0-9]+/g, "_");
 }
 export function toProperCaseTypeId(typeId: string) {
-	return toProperCase(typeId.replace(/\w+:/, ""));
+	return toProperCase(typeId?.replace(/\w+:/, ""));
 }
 export function toProperCase(string: string) {
-	return string.replace(/[_.]/g, ' ').replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+	return string?.replace(/[_.]/g, ' ')?.replace(/\w\S*/g, (txt) => txt.charAt(0)?.toUpperCase() + txt?.substr(1)?.toLowerCase());
 }
 export function toCamelCase(str: string) {
 	return str.replace(/(?:^\w|[A-Z]|(\b|_)\w)/g, (word, index) => word.toUpperCase()).replace(/[\s_]+/g, '').replace(/\w/, (world) => world.toLowerCase());
@@ -49,6 +49,7 @@ export function iterateObject<T extends Record<string, any>>(obj: T, callback: (
 		callback(key, obj[key], i++);
 	}
 }
+
 export function isDefined<T>(value: T | undefined | null): value is T {
 	return value !== undefined && value !== null && typeof value !== 'number' || Number.isFinite(value);
 }
@@ -78,7 +79,7 @@ export function parseCommand(message: string, prefix: string) {
 	let braceCount = [0, 0], bracketCount = [0, 0], quoteCount = 0, spaceCount = 0;
 	let started = false;
 	let o = 0;
-	const output = [];
+	const output: string[] = [];
 	for (let i = prefix.length; i < messageLength; i++) {
 		const char = message[i];
 		switch (char) {
