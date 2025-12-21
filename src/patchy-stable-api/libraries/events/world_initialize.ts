@@ -19,7 +19,7 @@ export class WorldInitializeEvent {
 			try {
 				const player = world.getPlayers()[0];
 				if (!player) return;
-				const { successCount } = await player.runCommandAsync("testfor @s");
+				const { successCount } = player.runCommand("testfor @s");
 				if (!successCount) return;
 				console.warn('world_initialised');
 				iterateObject(thisWorldInit.subscriptions, (id, callback) => callback());

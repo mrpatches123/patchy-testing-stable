@@ -1,15 +1,15 @@
 {
 	"type": "module",
 	"dependencies": {
-		"my-plugin": "file:./src/patchy-stable-api/typscript_lang/",
-		"@minecraft/server": "^1.8.0",
-		"@minecraft/server-ui": "^1.1.0",
+		"@minecraft/server": "^2.1.0",
+		"@minecraft/server-ui": "^2.0.0",
 		"@minecraft/vanilla-data": "^1.20.80",
 		"fs": "^0.0.1-security",
 		"path": "^0.12.7"
 	},
 	"scripts": {
 		"updatevd": "node src/node/update_vanilla_data.mjs",
-		"exportmain": "node src/node/export_pack_to_main.mjs"
+		"exportmain": "node src/node/export_pack_to_main.mjs",
+		"updatesrc": "node src/node/update_src.mjs"
 	}
 }

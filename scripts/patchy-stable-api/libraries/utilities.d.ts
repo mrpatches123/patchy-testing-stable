@@ -1,8 +1,9 @@
 import { Player, Vector3, ItemStack, Dimension, Entity, EntityQueryOptions, Block } from "@minecraft/server";
 import { ActionFormData, ActionFormResponse, MessageFormData, MessageFormResponse, ModalFormData, ModalFormResponse } from "@minecraft/server-ui";
-export declare const overworld: Dimension;
-export declare const nether: Dimension;
-export declare const end: Dimension;
+export declare let overworld: Dimension;
+export declare let nether: Dimension;
+export declare let end: Dimension;
+export declare let dimensions: Dimension[];
 export declare const content: {
     warn(...messages: any[]): void;
     chatFormat(...messages: any[]): void;
@@ -13,7 +14,7 @@ export declare function toProperCase(string: string): string;
 export declare function toCamelCase(str: string): string;
 export declare function fixPlayerScore(player: Player): void;
 export declare function iterateObject<T extends Record<string, any>>(obj: T, callback: (key: keyof T, value: T[keyof T], i: number) => void): void;
-export declare function isDefined<T>(value: T | undefined): value is T;
+export declare function isDefined<T>(value: T | undefined | null): value is T;
 export declare function isVector3(value: any): value is Vector3;
 export declare function chunkString(str: string, length: number): string[];
 export declare const facingDirectionToVector3: Record<number, Vector3>;

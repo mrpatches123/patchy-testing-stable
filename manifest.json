@@ -2,8 +2,8 @@
 	"format_version": 2,
 	"header": {
 		"description": "1.0.0",
-		"name": "test-stable",
-		"uuid": "ef7ba81a-95be-4c6c-ba1e-ed388376dbde",
+		"name": "patchy-vanilla-tweaks",
+		"uuid": "9eded259-8f2d-4f27-ae17-49abac4a8e26",
 		"version": [
 			1,
 			0,
@@ -18,7 +18,7 @@
 	"modules": [
 		{
 			"type": "data",
-			"uuid": "20227786-e832-4377-ad10-c0cf09488c54",
+			"uuid": "d72e5d91-3714-4178-a22c-156290f76194",
 			"version": [
 				0,
 				1,
@@ -28,19 +28,19 @@
 		{
 			"type": "script",
 			"language": "javascript",
-			"uuid": "b9f874f0-264a-426d-b6b1-ebf0924c43a3",
-			"entry": "scripts/index.js",
+			"uuid": "e2073783-8b9a-47f4-809b-0a1822ccb769",
+			"entry": "scripts/imports.js",
 			"version": "1.0.0-beta"
 		}
 	],
 	"dependencies": [
 		{
 			"module_name": "@minecraft/server-ui",
-			"version": "1.1.0"
+			"version": "2.0.0"
 		},
 		{
 			"module_name": "@minecraft/server",
-			"version": "1.8.0"
+			"version": "2.1.0"
 		}
 	],
 	"capabilities": [
@@ -49,7 +49,6 @@
 	"metadata": {
 		"generated_with": {
 			"bridge": [
-				"1.8.4",
 				"1.8.5"
 			]
 		}
