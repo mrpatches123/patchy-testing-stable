@@ -13,8 +13,8 @@ export class Storage {
         return this.managers[id];
     }
     constructor() {
-        world.beforeEvents.playerLeave.subscribe(({ player }) => {
-            delete this.managers[player.id];
+        world.afterEvents.playerLeave.subscribe(({ playerId }) => {
+            delete this.managers[playerId];
         });
         world.afterEvents.entityRemove.subscribe(({ removedEntityId }) => {
             delete this.managers[removedEntityId];
@@ -36,17 +36,14 @@ var DynamicPropertyTypes;
 })(DynamicPropertyTypes || (DynamicPropertyTypes = {}));
 const fixObjectiveName = '$entity$_$storage234';
 let fixObjective;
-world.afterEvents.worldLoad.subscribe(() => {
-    try {
-        fixObjective = world.scoreboard.addObjective(fixObjectiveName);
-    }
-    catch {
-        fixObjective = world.scoreboard.getObjective(fixObjectiveName);
-    }
-});
+try {
+    fixObjective = world.scoreboard.addObjective(fixObjectiveName);
+}
+catch {
+    fixObjective = world.scoreboard.getObjective(fixObjectiveName);
+}
 const chunkAmountJSON = 10922;
 class DynamicPropertyManager {
-    proxies = {};
     dynamicProperties = {};
     root;
     constructor(root) {
@@ -372,7 +369,7 @@ class DynamicPropertyManager {
     }
     get strings() {
         const thisEntityStorage = this;
-        this.proxies["strings"] ??= new Proxy({}, {
+        return new Proxy({}, {
             set: (target, key, value, receiver) => {
                 thisEntityStorage.setString(key, value);
                 return Reflect.set(target, key, value, receiver);
@@ -381,11 +378,10 @@ class DynamicPropertyManager {
                 return thisEntityStorage.getString(key);
             }
         });
-        return this.proxies["strings"];
     }
     get jsons() {
         const thisEntityStorage = this;
-        this.proxies["jsons"] ??= new Proxy({}, {
+        return new Proxy({}, {
             set: (target, key, value, receiver) => {
                 thisEntityStorage.setJSON(key, value);
                 return Reflect.set(target, key, value, receiver);
@@ -394,11 +390,10 @@ class DynamicPropertyManager {
                 return thisEntityStorage.getJSON(key);
             }
         });
-        return this.proxies["jsons"];
     }
     get numbers() {
         const thisEntityStorage = this;
-        this.proxies["numbers"] ??= new Proxy({}, {
+        return new Proxy({}, {
             set: (target, key, value, receiver) => {
                 thisEntityStorage.setNumber(key, value);
                 return Reflect.set(target, key, value, receiver);
@@ -407,11 +402,10 @@ class DynamicPropertyManager {
                 return thisEntityStorage.getNumber(key);
             }
         });
-        return this.proxies["numbers"];
     }
     get booleans() {
         const thisEntityStorage = this;
-        this.proxies["booleans"] ??= new Proxy({}, {
+        return new Proxy({}, {
             set: (target, key, value, receiver) => {
                 thisEntityStorage.setBoolean(key, value);
                 return Reflect.set(target, key, value, receiver);
@@ -420,11 +414,10 @@ class DynamicPropertyManager {
                 return thisEntityStorage.getBoolean(key);
             }
         });
-        return this.proxies["booleans"];
     }
     get vector3s() {
         const thisEntityStorage = this;
-        this.proxies["vector3s"] ??= new Proxy({}, {
+        return new Proxy({}, {
             set: (target, key, value, receiver) => {
                 thisEntityStorage.setVector3(key, value);
                 return Reflect.set(target, key, value, receiver);
@@ -433,7 +426,6 @@ class DynamicPropertyManager {
                 return thisEntityStorage.getVector3(key);
             }
         });
-        return this.proxies["vector3s"];
     }
 }
 class EntityStorageManager extends DynamicPropertyManager {
@@ -472,8 +464,6 @@ class EntityStorageManager extends DynamicPropertyManager {
                     throw new Error(`objective doesn't exist: ${key}`);
             }
             this.scoresStorage[key].gotten = true;
-            if (!fixObjective)
-                throw new Error("To early in exetcution");
             if (!this.root.scoreboardIdentity)
                 fixObjective.setScore(this.root, 0);
             this.scoresStorage[key].value = objective.getScore(this.root);
@@ -505,7 +495,7 @@ class EntityStorageManager extends DynamicPropertyManager {
     scoresStorage = {};
     get scores() {
         const thisEntityStorage = this;
-        this.proxies["scores"] ??= new Proxy({}, {
+        return new Proxy({}, {
             set: (target, key, value, receiver) => {
                 thisEntityStorage.setScore(key, value);
                 return Reflect.set(target, key, value, receiver);
@@ -514,7 +504,6 @@ class EntityStorageManager extends DynamicPropertyManager {
                 return thisEntityStorage.getScore(key);
             }
         });
-        return this.proxies["scores"];
     }
 }
 class WorldStorageManager extends DynamicPropertyManager {
@@ -577,7 +566,7 @@ class WorldStorageManager extends DynamicPropertyManager {
     }
     get scores() {
         const thisEntityStorage = this;
-        this.proxies["scores"] ??= new Proxy({}, {
+        return new Proxy({}, {
             get: (target, key, receiver) => {
                 return new Proxy({}, {
                     set: (target, dummyName, value, receiver) => {
@@ -590,7 +579,6 @@ class WorldStorageManager extends DynamicPropertyManager {
                 });
             }
         });
-        return this.proxies["scores"];
     }
 }
 ;

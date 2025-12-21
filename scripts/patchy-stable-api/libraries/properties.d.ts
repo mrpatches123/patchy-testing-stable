@@ -15,7 +15,6 @@ declare enum DynamicPropertyTypes {
     json = "json"
 }
 declare class DynamicPropertyManager {
-    proxies: Record<string, any>;
     dynamicProperties: Record<string, {
         type?: DynamicPropertyTypes;
         value?: number | boolean | Vector3 | string;
