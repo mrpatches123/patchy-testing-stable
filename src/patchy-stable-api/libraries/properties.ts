@@ -1,6 +1,7 @@
 import { Entity, Player, Scoreboard, ScoreboardObjective, Vector3, World, world } from "@minecraft/server";
 import { chunkString, isDefined, isVector3 } from "./utilities";
 import { StorageChangedType, customEvents } from "./events";
+import { worldInitialize } from "./events/world_initialize";
 export class Storage {
 	protected managers: Record<string, EntityStorageManager | WorldStorageManager> = { 'world': new WorldStorageManager(world) };
 	get(): WorldStorageManager;
@@ -35,12 +36,14 @@ enum DynamicPropertyTypes {
 	json = 'json',
 }
 const fixObjectiveName = '$entity$_$storage234';
-let fixObjective: ScoreboardObjective;
-try {
-	fixObjective = world.scoreboard.addObjective(fixObjectiveName);
-} catch {
-	fixObjective = world.scoreboard.getObjective(fixObjectiveName)!;
-}
+let fixObjective: ScoreboardObjective | undefined;
+customEvents.worldInitialize.subscribe(() => {
+	try {
+		fixObjective = world.scoreboard.addObjective(fixObjectiveName);
+	} catch {
+		fixObjective = world.scoreboard.getObjective(fixObjectiveName)!;
+	}
+});
 const chunkAmountJSON = 10922;
 class DynamicPropertyManager {
 	dynamicProperties: Record<string, { type?: DynamicPropertyTypes, value?: number | boolean | Vector3 | string; gotten?: boolean; }> = {};
@@ -407,7 +410,11 @@ class EntityStorageManager extends DynamicPropertyManager {
 				if (!objective) throw new Error(`objective doesn't exist: ${key}`);
 			}
 			this.scoresStorage[key].gotten = true;
-			if (!this.root.scoreboardIdentity) fixObjective.setScore(this.root, 0);
+
+			if (!this.root.scoreboardIdentity) {
+				if (!fixObjective) return;
+				fixObjective.setScore(this.root, 0);
+			}
 			this.scoresStorage[key].value = objective.getScore(this.root);
 		}
 		return this.scoresStorage[key]?.value;

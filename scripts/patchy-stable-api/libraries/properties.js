@@ -36,12 +36,14 @@ var DynamicPropertyTypes;
 })(DynamicPropertyTypes || (DynamicPropertyTypes = {}));
 const fixObjectiveName = '$entity$_$storage234';
 let fixObjective;
-try {
-    fixObjective = world.scoreboard.addObjective(fixObjectiveName);
-}
-catch {
-    fixObjective = world.scoreboard.getObjective(fixObjectiveName);
-}
+customEvents.worldInitialize.subscribe(() => {
+    try {
+        fixObjective = world.scoreboard.addObjective(fixObjectiveName);
+    }
+    catch {
+        fixObjective = world.scoreboard.getObjective(fixObjectiveName);
+    }
+});
 const chunkAmountJSON = 10922;
 class DynamicPropertyManager {
     dynamicProperties = {};
@@ -464,8 +466,11 @@ class EntityStorageManager extends DynamicPropertyManager {
                     throw new Error(`objective doesn't exist: ${key}`);
             }
             this.scoresStorage[key].gotten = true;
-            if (!this.root.scoreboardIdentity)
+            if (!this.root.scoreboardIdentity) {
+                if (!fixObjective)
+                    return;
                 fixObjective.setScore(this.root, 0);
+            }
             this.scoresStorage[key].value = objective.getScore(this.root);
         }
         return this.scoresStorage[key]?.value;

@@ -1,6 +1,7 @@
 import { CommandPermissionLevel, Player, system, world } from "@minecraft/server";
 import { ModalForm } from "./libraries/form";
 import { storage } from "./libraries/properties";
+import { Command } from "./libraries/command";
 
 export function jsonifyMap(map: Map<any, any>) {
 	const object = {};
@@ -102,7 +103,7 @@ export async function showConsoleForm(receiver) {
 		}).showAwaitNotBusy(receiver);
 }
 system.beforeEvents.startup.subscribe((event) => {
-	event.customCommandRegistry.registerCommand({ description: "shows console settings form", name: "apotheosis:console", permissionLevel: CommandPermissionLevel.Admin }, (origin) => {
+	Command.registerCommand({ description: "shows console settings form", name: "apotheosis:console", permissionLevel: CommandPermissionLevel.Admin }, (origin) => {
 		const { sourceEntity } = origin;
 		if (!(sourceEntity instanceof Player)) return;
 		system.runTimeout(() => showConsoleForm(sourceEntity), 2);

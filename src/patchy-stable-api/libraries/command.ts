@@ -48,7 +48,7 @@ export class Command {
 			mandatoryParameters?: M;
 			optionalParameters?: O;
 		} & MyCustomCommand,
-		cb: (origin: CustomCommandOrigin, ...data: [...ExtractParamTypesEnum<M>, ...ExtractParamTypesOptionalEnum<O>]) => Promise<void> | CustomCommandResult | undefined,
+		cb: (origin: CustomCommandOrigin, ...data: [...ExtractParamTypesEnum<M>, ...ExtractParamTypesOptionalEnum<O>]) => CustomCommandResult | undefined | void | Promise<void>,
 	): void {
 		const newArgs = <CustomCommand>args;
 		newArgs.mandatoryParameters = args.mandatoryParameters?.map(param => {

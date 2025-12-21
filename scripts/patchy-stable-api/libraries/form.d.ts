@@ -74,6 +74,24 @@ declare class ActionFormWithoutCallback extends ButtonForm {
      */
     button(...args: Parameters<ActionFormData['button']>): ActionForm;
     /**
+     * Add a label to the form (cannot call callback after this method is called)
+     * @param {...Parameters<ActionFormData['label']>} args
+     * @returns {ActionForm}
+     */
+    label(...args: Parameters<ActionFormData['label']>): this;
+    /**
+     * Add a header to the form (cannot call callback after this method is called)
+     * @param {...Parameters<ActionFormData['header']>} args
+     * @returns {ActionForm}
+     */
+    header(...args: Parameters<ActionFormData['header']>): this;
+    /**
+     * Add a divider to the form (cannot call callback after this method is called)
+     * @param {...Parameters<ActionFormData['divider']>} args
+     * @returns {ActionForm}
+     */
+    divider(...args: Parameters<ActionFormData['divider']>): this;
+    /**
      * Set the title of the form (cannot call callback after this method is called)
      * @param {...Parameters<ActionFormData['title']>} args
      * @returns {this}
@@ -172,12 +190,36 @@ declare class ModalFormWithoutCallback extends Form {
     /**
      * @type {(((receiver: Player, data: string | number | boolean, i: number) => void) | undefined)[]}
      */
-    protected callbacks: (((receiver: Player, data: string | number | boolean, i: number) => void) | undefined)[];
+    protected callbacks: (((receiver: Player, data: string | number | boolean | undefined, i: number) => void) | undefined)[];
     /**
      * @type {LastCallCallbackable}
      */
     protected lastCallCallbackable: LastCallCallbackable;
     constructor();
+    /**
+     * set the submitButton text on the form (cannot call callback after this method is called)
+     * @param {...Parameters<ModalFormData['submitButton']>} args
+     * @returns {this}
+     */
+    submitButton(...args: Parameters<ModalFormData['submitButton']>): this;
+    /**
+     * add a divider to the form (cannot call callback after this method is called)
+     * @param {...Parameters<ModalFormData['label']>} args
+     * @returns {this}
+     */
+    label(...args: Parameters<ModalFormData['label']>): this;
+    /**
+     * add a divider to the form (cannot call callback after this method is called)
+     * @param {...Parameters<ModalFormData['header']>} args
+     * @returns {this}
+     */
+    header(...args: Parameters<ModalFormData['header']>): this;
+    /**
+     * add a divider to the form (cannot call callback after this method is called)
+     * @param {...Parameters<ModalFormData['divider']>} args
+     * @returns {this}
+     */
+    divider(...args: Parameters<ModalFormData['divider']>): this;
     /**
      * Set the title of the form (cannot call callback after this method is called)
      * @param {...Parameters<ModalFormData['title']>} args
@@ -221,7 +263,7 @@ declare class ModalFormWithoutCallback extends Form {
      */
     showAwaitNotBusy(receiver: Player): Promise<ModalFormResponse | undefined>;
 }
-export declare class ModalFormWithCallback<lastCallbackData extends string | number | boolean> extends ModalFormWithoutCallback {
+export declare class ModalFormWithCallback<lastCallbackData extends string | number | boolean | undefined> extends ModalFormWithoutCallback {
     constructor();
     /**
      * Add a callback to the last callbackable element method called (cannot call callback after this method is called)

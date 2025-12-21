@@ -95,7 +95,7 @@ class ButtonForm extends Form {
         this.lastCallCallbackable = false;
         let response;
         while (true) {
-            if (!receiver || !receiver.isValid())
+            if (!receiver || !receiver.isValid)
                 return;
             response = await this.root.show(receiver);
             if (response.cancelationReason !== FormCancelationReason.UserBusy) {
@@ -145,6 +145,36 @@ class ActionFormWithoutCallback extends ButtonForm {
         this.root.button(...args);
         this.lastCallCallbackable = true;
         this.callbacks.push(undefined);
+        return this;
+    }
+    /**
+     * Add a label to the form (cannot call callback after this method is called)
+     * @param {...Parameters<ActionFormData['label']>} args
+     * @returns {ActionForm}
+     */
+    label(...args) {
+        this.lastCallCallbackable = false;
+        this.root.label(...args);
+        return this;
+    }
+    /**
+     * Add a header to the form (cannot call callback after this method is called)
+     * @param {...Parameters<ActionFormData['header']>} args
+     * @returns {ActionForm}
+     */
+    header(...args) {
+        this.lastCallCallbackable = false;
+        this.root.header(...args);
+        return this;
+    }
+    /**
+     * Add a divider to the form (cannot call callback after this method is called)
+     * @param {...Parameters<ActionFormData['divider']>} args
+     * @returns {ActionForm}
+     */
+    divider(...args) {
+        this.lastCallCallbackable = false;
+        this.root.divider(...args);
         return this;
     }
     /**
@@ -301,6 +331,46 @@ class ModalFormWithoutCallback extends Form {
         super();
     }
     /**
+     * set the submitButton text on the form (cannot call callback after this method is called)
+     * @param {...Parameters<ModalFormData['submitButton']>} args
+     * @returns {this}
+     */
+    submitButton(...args) {
+        this.lastCallCallbackable = LastCallCallbackable.none;
+        this.root.submitButton(...args);
+        return this;
+    }
+    /**
+     * add a divider to the form (cannot call callback after this method is called)
+     * @param {...Parameters<ModalFormData['label']>} args
+     * @returns {this}
+     */
+    label(...args) {
+        this.lastCallCallbackable = LastCallCallbackable.none;
+        this.root.label(...args);
+        return this;
+    }
+    /**
+     * add a divider to the form (cannot call callback after this method is called)
+     * @param {...Parameters<ModalFormData['header']>} args
+     * @returns {this}
+     */
+    header(...args) {
+        this.lastCallCallbackable = LastCallCallbackable.none;
+        this.root.header(...args);
+        return this;
+    }
+    /**
+     * add a divider to the form (cannot call callback after this method is called)
+     * @param {...Parameters<ModalFormData['divider']>} args
+     * @returns {this}
+     */
+    divider(...args) {
+        this.lastCallCallbackable = LastCallCallbackable.none;
+        this.root.divider(...args);
+        return this;
+    }
+    /**
      * Set the title of the form (cannot call callback after this method is called)
      * @param {...Parameters<ModalFormData['title']>} args
      * @returns {this}
@@ -396,7 +466,7 @@ class ModalFormWithoutCallback extends Form {
             this.lastCallCallbackable = LastCallCallbackable.none;
             let response;
             while (true) {
-                if (!receiver || !receiver.isValid())
+                if (!receiver || !receiver.isValid)
                     return;
                 response = await this.root.show(receiver);
                 if (response.cancelationReason !== FormCancelationReason.UserBusy) {

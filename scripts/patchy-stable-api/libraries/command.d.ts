@@ -42,6 +42,6 @@ export declare class Command {
     static registerCommand<M extends MyCommandParameter[], O extends MyCommandParameter[]>(args: {
         mandatoryParameters?: M;
         optionalParameters?: O;
-    } & MyCustomCommand, cb: (origin: CustomCommandOrigin, ...data: [...ExtractParamTypesEnum<M>, ...ExtractParamTypesOptionalEnum<O>]) => Promise<void> | CustomCommandResult | undefined): void;
+    } & MyCustomCommand, cb: (origin: CustomCommandOrigin, ...data: [...ExtractParamTypesEnum<M>, ...ExtractParamTypesOptionalEnum<O>]) => CustomCommandResult | undefined | void | Promise<void>): void;
 }
 export {};
