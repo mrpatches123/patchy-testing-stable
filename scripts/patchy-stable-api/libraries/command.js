@@ -1,70 +1,204 @@
-import { CustomCommandStatus, system, } from "@minecraft/server";
-import '../prototypes';
-function isAsync(fn) {
-    return fn.constructor.name === "AsyncFunction";
-}
-export class Command {
-    static enums = {};
-    static commands = [];
-    /**
-     * Registers a custom command with the given parameters and callback function.
-     * Make sure to as const the parameters to ensure type safety and proper inference of types.
-     */
-    static registerCommand(args, cb) {
-        const newArgs = args;
-        newArgs.mandatoryParameters = args.mandatoryParameters?.map(param => {
-            const { name, type, enumValues } = param;
-            if (enumValues)
-                Command.enums[name] = enumValues;
-            return { name, type };
-        });
-        newArgs.optionalParameters = args.optionalParameters?.map(param => {
-            const { name, type, enumValues } = param;
-            if (enumValues)
-                Command.enums[name] = enumValues;
-            return { name, type };
-        });
-        Command.commands.push([newArgs, cb]);
+import { Player } from "@minecraft/server";
+class CommandBuilder {
+    commands = {};
+    commandAlises = {};
+    scriptMessageCommands = {};
+    scriptMessageCommandAlises = {};
+    constructor() {
+    }
+    subscribeScriptMessageEvent() {
+        const scriptMessageCallback = (event) => {
+            const { id, sourceEntity, message } = event;
+            if (!(sourceEntity instanceof Player))
+                return;
+            let command = this.getScriptMessageCommand(id);
+            if (!command)
+                command = this.getScriptMessageCommand(this.scriptMessageCommandAlises[id]);
+            if (!command)
+                return;
+        };
+    }
+    // addCommand(name: string, callback: (receiver: Player) => void): Command {
+    // 	throw new Error("Method not implemented.");
+    // 	this.commands[name] = new Command(name);
+    // 	return this.commands[name];
+    // }
+    addScriptMessageCommand(id, callback) {
+        this.commands[id] = new Command(id);
+        return this.commands[id];
+    }
+    getScriptMessageCommand(name) {
+        return this.commands[name];
+    }
+    // getCommand(name: string): Command {
+    // 	throw new Error("Method not implemented.");
+    // 	return this.commands[name];
+    // }
+    addCommandAlias(alias, commandName) {
+        this.commandAlises[alias] = commandName;
+    }
+    addScriptMessageCommandAlias(alias, commandName) {
+        this.scriptMessageCommandAlises[alias] = commandName;
     }
 }
-system.beforeEvents.startup.subscribe((event) => {
-    Object.entries(Command.enums).forEach(([name, enumArray]) => {
-        event.customCommandRegistry.registerEnum(name, enumArray);
-    });
-    Command.commands.forEach(([newArgs, cb]) => {
-        event.customCommandRegistry.registerCommand(newArgs, ((...result) => {
-            console.warn({ t: "3938", result });
-            const callback = cb;
-            if (isAsync(callback)) {
-                callback(...result);
-                return { status: CustomCommandStatus.Success };
-            }
-            return callback?.(...result);
-        }));
-    });
-    Command.commands = [];
-    Command.enums = {};
-});
-// Command.registerCommand({
-// 	name: "wkdwk",
-// 	description: "wwddwdw",
-// 	permissionLevel: CommandPermissionLevel.Any,
-// 	mandatoryParameters: [
-// 		{
-// 			type: CustomCommandParamType.Location,
-// 			name: "jdkjdw"
-// 		},
-// 		{
-// 			type: CustomCommandParamType.Enum,
-// 			name: "test",
-// 			enumValues: ["wwddw", "wdklwdk"] as const
-// 		}] as const,
-// 	optionalParameters: [
-// 		{
-// 			type: CustomCommandParamType.Enum,
-// 			name: "test2",
-// 			enumValues: ["wwddw", "wdklwdk"] as const
-// 		}] as const,
-// }, (...args) => {
-// 	return undefined;
-// });
+const commandBuilder = new CommandBuilder();
+// class Command {
+// 	addArgument<T extends keyof ArgumentCallbackType>(ArgumentType: T, callback: ArgumentCallbackType[T]) {
+// 	}
+// }
+export class ArgumentedCommandTypes {
+    static get String() {
+        return new StringArgumentedCommand();
+    }
+    static get Number() {
+        return new NumberArgumentedCommand();
+    }
+    static get Boolean() {
+        return new BooleanArgumentedCommand();
+    }
+    static get Vector3() {
+        return new Vector3ArgumentedCommand();
+    }
+    static get JSON() {
+        return new JSONArgumentedCommand();
+    }
+    static get Selector() {
+        return new SelectorArgumentedCommand();
+    }
+    static get Custom() {
+        return new CustomArgumentedCommand();
+    }
+}
+class BaseCommand {
+    elseCallbacks = [];
+    branches = [];
+    constructor() {
+    }
+}
+class Command extends BaseCommand {
+    name;
+    constructor(name) {
+        super();
+        this.name = name;
+    }
+    addSubCommand(shouldBranchCallback, subCommand) {
+        this.branches.push({ branch: subCommand, shouldBranchCallback });
+        return this;
+    }
+    ;
+    elseCallback(callback) {
+        this.elseCallbacks.push(callback);
+        return this;
+    }
+    // addAlias(alias: string): this {
+    // 	commandBuilder.addCommandAlias(alias, this.name);
+    // 	return this;
+    // }
+    // addliases(aliases: string[]): this {
+    // 	aliases.forEach(alias => {
+    // 		this.addAlias(alias);
+    // 	});
+    // 	return this;
+    // };
+    addScriptMessageCommandAlias(alias) {
+        commandBuilder.addScriptMessageCommandAlias(alias, this.name);
+        return this;
+    }
+    addScriptMessageCommandAliases(aliases) {
+        aliases.forEach(alias => {
+            this.addScriptMessageCommandAlias(alias);
+        });
+        return this;
+    }
+}
+class NumberArgumentedCommand extends BaseCommand {
+    addSubCommand(shouldBranchCallback, subCommand) {
+        this.branches.push({ branch: subCommand, shouldBranchCallback });
+        return this;
+    }
+    elseCallback(callback) {
+        this.elseCallbacks.push(callback);
+        return this;
+    }
+    constructor() {
+        super();
+    }
+}
+class StringArgumentedCommand extends BaseCommand {
+    addSubCommand(shouldBranchCallback, subCommand) {
+        this.branches.push({ branch: subCommand, shouldBranchCallback });
+        return this;
+    }
+    elseCallback(callback) {
+        this.elseCallbacks.push(callback);
+        return this;
+    }
+    constructor() {
+        super();
+    }
+}
+class BooleanArgumentedCommand extends BaseCommand {
+    addSubCommand(shouldBranchCallback, subCommand) {
+        this.branches.push({ branch: subCommand, shouldBranchCallback });
+        return this;
+    }
+    elseCallback(callback) {
+        this.elseCallbacks.push(callback);
+        return this;
+    }
+    constructor() {
+        super();
+    }
+}
+class Vector3ArgumentedCommand extends BaseCommand {
+    addSubCommand(shouldBranchCallback, subCommand) {
+        this.branches.push({ branch: subCommand, shouldBranchCallback });
+        return this;
+    }
+    elseCallback(callback) {
+        this.elseCallbacks.push(callback);
+        return this;
+    }
+    constructor() {
+        super();
+    }
+}
+class JSONArgumentedCommand extends BaseCommand {
+    addSubCommand(shouldBranchCallback, subCommand) {
+        this.branches.push({ branch: subCommand, shouldBranchCallback });
+        return this;
+    }
+    elseCallback(callback) {
+        this.elseCallbacks.push(callback);
+        return this;
+    }
+    constructor() {
+        super();
+    }
+}
+class SelectorArgumentedCommand extends BaseCommand {
+    addSubCommand(shouldBranchCallback, subCommand) {
+        this.branches.push({ branch: subCommand, shouldBranchCallback });
+        return this;
+    }
+    elseCallback(callback) {
+        this.elseCallbacks.push(callback);
+        return this;
+    }
+    constructor() {
+        super();
+    }
+}
+class CustomArgumentedCommand extends BaseCommand {
+    addSubCommand(shouldBranchCallback, subCommand) {
+        this.branches.push({ branch: subCommand, shouldBranchCallback });
+        return this;
+    }
+    elseCallback(callback) {
+        this.elseCallbacks.push(callback);
+        return this;
+    }
+    constructor() {
+        super();
+    }
+}

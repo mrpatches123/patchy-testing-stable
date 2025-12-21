@@ -13,7 +13,7 @@
 		"checkJs": true,
 		"allowUnreachableCode": true,
 		"allowUnusedLabels": true,
-		"noImplicitAny": false,
+		"noImplicitAny": true,
 		"noImplicitReturns": false,
 		"noImplicitUseStrict": false,
 		"outDir": "scripts/",

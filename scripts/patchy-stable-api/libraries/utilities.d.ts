@@ -20,7 +20,7 @@ export declare function chunkString(str: string, length: number): string[];
 export declare const facingDirectionToVector3: Record<number, Vector3>;
 export declare function parseCommand(message: string, prefix: string): string[];
 export declare function cartesianToCircular(vector: Vector3, center?: Vector3): {
-    theta: any;
+    theta: number;
     r: number;
     x: number;
     z: number;
