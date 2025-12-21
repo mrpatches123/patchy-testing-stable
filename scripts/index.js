@@ -1,9 +1,17 @@
 import { BlockPermutation, Player, system, world } from "@minecraft/server";
 import { ActionForm, MessageForm, ModalForm } from "./patchy-stable-api/libraries/form";
-import { MinecraftBlockTypes, MinecraftItemTypes } from "./patchy-stable-api/libraries/vanilla-data";
+import { MinecraftBlockTypes, MinecraftEntityTypes, MinecraftItemTypes } from "./patchy-stable-api/libraries/vanilla-data";
 import { storage } from "./patchy-stable-api/libraries/properties";
 import { getBlockArrayAsync, overworld } from "patchy-stable-api/libraries/utilities";
-import { customEvents } from "patchy-stable-api/libraries/events";
+import { Iterate } from "patchy-stable-api/libraries/iterate";
+import { Timer } from "patchy-stable-api/libraries/time";
+// const pigIterate = new Iterate(() => overworld.getEntities({ type: MinecraftEntityTypes.Pig }));
+// system.runInterval(() => {
+// 	console.warn("Interval");
+// 	const pig = pigIterate.next();
+// 	if (!pig) return;
+// 	console.warn(pig.id);
+// }, 10);
 const itemsFunctions = {
     "action": (source) => {
         const form = new ActionForm();
@@ -33,14 +41,14 @@ const itemsFunctions = {
     },
     "modal": (source) => {
         const form = new ModalForm();
-        form.slider("test0", 0, 10, 1)
+        form.slider("test0", 0, 10)
             .callback((receiver, number) => console.warn("test0", number))
             .dropdown("test1", ["a", "b", "c"])
             .callback((receiver, number) => console.warn("test1", number))
             .textField("test2_NONE", "default")
             .textField("test3", "default")
             .callback((receiver, text) => console.warn("test3", text))
-            .toggle("test4", false)
+            .toggle("test4")
             .callback((receiver, boolean) => console.warn("test4", boolean))
             .busyCallback(() => console.warn("busy"))
             .closeCallback(() => console.warn("closed"))
@@ -115,6 +123,8 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
             break;
         }
         case "get": {
+            const { numbers } = playerStorage;
+            console.warn(numbers.test2);
             sourceEntity.sendMessage(JSON.stringify({
                 score: playerStorage.scores.test ?? "null",
                 bool: playerStorage.booleans.test1 ?? "null",
@@ -162,7 +172,15 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
         }
     }
 });
-customEvents.beforeItemUseOnFirst.subscribe((event) => {
-    event.cancel = true;
-    console.warn("beforeItemUseOnFirst", event.source.name);
-});
+const cowIterate = new Iterate(() => overworld.getEntities({ type: MinecraftEntityTypes.Cow }));
+system.runInterval(() => {
+    const { value: cow, isLast, index: i } = cowIterate.nextWithData();
+    console.warn(JSON.stringify({ cow: cow?.id ?? "null", isLast }));
+    if (!cow || !cow.isValid)
+        return;
+    let timer = Timer.getFromEntity(cow, "testTimer");
+    if (timer === false)
+        return;
+    timer ??= new Timer().setCountDown(30000);
+    timer.saveToEntity(cow, "testTimer");
+}, 10);
