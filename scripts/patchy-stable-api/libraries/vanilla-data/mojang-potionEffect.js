@@ -1,0 +1,53 @@
+/**
+ * All possible MinecraftPotionEffectTypes
+ */
+export var MinecraftPotionEffectTypes;
+(function (MinecraftPotionEffectTypes) {
+    MinecraftPotionEffectTypes["Awkward"] = "minecraft:awkward";
+    MinecraftPotionEffectTypes["FireResistance"] = "minecraft:fire_resistance";
+    MinecraftPotionEffectTypes["Harming"] = "minecraft:harming";
+    MinecraftPotionEffectTypes["Healing"] = "minecraft:healing";
+    MinecraftPotionEffectTypes["Infested"] = "minecraft:infested";
+    MinecraftPotionEffectTypes["Invisibility"] = "minecraft:invisibility";
+    MinecraftPotionEffectTypes["Leaping"] = "minecraft:leaping";
+    MinecraftPotionEffectTypes["LongFireResistance"] = "minecraft:long_fire_resistance";
+    MinecraftPotionEffectTypes["LongInvisibility"] = "minecraft:long_invisibility";
+    MinecraftPotionEffectTypes["LongLeaping"] = "minecraft:long_leaping";
+    MinecraftPotionEffectTypes["LongMundane"] = "minecraft:long_mundane";
+    MinecraftPotionEffectTypes["LongNightvision"] = "minecraft:long_nightvision";
+    MinecraftPotionEffectTypes["LongPoison"] = "minecraft:long_poison";
+    MinecraftPotionEffectTypes["LongRegeneration"] = "minecraft:long_regeneration";
+    MinecraftPotionEffectTypes["LongSlowFalling"] = "minecraft:long_slow_falling";
+    MinecraftPotionEffectTypes["LongSlowness"] = "minecraft:long_slowness";
+    MinecraftPotionEffectTypes["LongStrength"] = "minecraft:long_strength";
+    MinecraftPotionEffectTypes["LongSwiftness"] = "minecraft:long_swiftness";
+    MinecraftPotionEffectTypes["LongTurtleMaster"] = "minecraft:long_turtle_master";
+    MinecraftPotionEffectTypes["LongWaterBreathing"] = "minecraft:long_water_breathing";
+    MinecraftPotionEffectTypes["LongWeakness"] = "minecraft:long_weakness";
+    MinecraftPotionEffectTypes["Mundane"] = "minecraft:mundane";
+    MinecraftPotionEffectTypes["Nightvision"] = "minecraft:nightvision";
+    MinecraftPotionEffectTypes["Oozing"] = "minecraft:oozing";
+    MinecraftPotionEffectTypes["Poison"] = "minecraft:poison";
+    MinecraftPotionEffectTypes["Regeneration"] = "minecraft:regeneration";
+    MinecraftPotionEffectTypes["SlowFalling"] = "minecraft:slow_falling";
+    MinecraftPotionEffectTypes["Slowness"] = "minecraft:slowness";
+    MinecraftPotionEffectTypes["Strength"] = "minecraft:strength";
+    MinecraftPotionEffectTypes["StrongHarming"] = "minecraft:strong_harming";
+    MinecraftPotionEffectTypes["StrongHealing"] = "minecraft:strong_healing";
+    MinecraftPotionEffectTypes["StrongLeaping"] = "minecraft:strong_leaping";
+    MinecraftPotionEffectTypes["StrongPoison"] = "minecraft:strong_poison";
+    MinecraftPotionEffectTypes["StrongRegeneration"] = "minecraft:strong_regeneration";
+    MinecraftPotionEffectTypes["StrongSlowness"] = "minecraft:strong_slowness";
+    MinecraftPotionEffectTypes["StrongStrength"] = "minecraft:strong_strength";
+    MinecraftPotionEffectTypes["StrongSwiftness"] = "minecraft:strong_swiftness";
+    MinecraftPotionEffectTypes["StrongTurtleMaster"] = "minecraft:strong_turtle_master";
+    MinecraftPotionEffectTypes["Swiftness"] = "minecraft:swiftness";
+    MinecraftPotionEffectTypes["Thick"] = "minecraft:thick";
+    MinecraftPotionEffectTypes["TurtleMaster"] = "minecraft:turtle_master";
+    MinecraftPotionEffectTypes["Water"] = "minecraft:water";
+    MinecraftPotionEffectTypes["WaterBreathing"] = "minecraft:water_breathing";
+    MinecraftPotionEffectTypes["Weakness"] = "minecraft:weakness";
+    MinecraftPotionEffectTypes["Weaving"] = "minecraft:weaving";
+    MinecraftPotionEffectTypes["WindCharged"] = "minecraft:wind_charged";
+    MinecraftPotionEffectTypes["Wither"] = "minecraft:wither";
+})(MinecraftPotionEffectTypes || (MinecraftPotionEffectTypes = {}));

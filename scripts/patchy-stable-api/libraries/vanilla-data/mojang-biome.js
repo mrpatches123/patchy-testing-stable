@@ -66,6 +66,7 @@ export var MinecraftBiomeTypes;
     MinecraftBiomeTypes["MushroomIsland"] = "minecraft:mushroom_island";
     MinecraftBiomeTypes["MushroomIslandShore"] = "minecraft:mushroom_island_shore";
     MinecraftBiomeTypes["Ocean"] = "minecraft:ocean";
+    MinecraftBiomeTypes["PaleGarden"] = "minecraft:pale_garden";
     MinecraftBiomeTypes["Plains"] = "minecraft:plains";
     MinecraftBiomeTypes["RedwoodTaigaHillsMutated"] = "minecraft:redwood_taiga_hills_mutated";
     MinecraftBiomeTypes["RedwoodTaigaMutated"] = "minecraft:redwood_taiga_mutated";

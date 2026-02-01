@@ -9,3 +9,5 @@ export * from './mojang-enchantment.js';
 export * from './mojang-entity.js';
 export * from './mojang-feature.js';
 export * from './mojang-item.js';
+export * from './mojang-potionDelivery.js';
+export * from './mojang-potionEffect.js';
