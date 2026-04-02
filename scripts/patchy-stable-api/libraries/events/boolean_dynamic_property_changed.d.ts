@@ -8,6 +8,8 @@ export declare class BooleanDynamicPropertyChangedEvent extends StorageChangedEv
         previousValue: boolean | undefined;
         currentValue: boolean | undefined;
         cancel: boolean;
+        cancelCache: Boolean;
+        cancelSet: Boolean;
     }) => void): number;
     runEvent(target: Player | Entity | World, key: string, previousValue: boolean | undefined, currentValue: boolean | undefined): {
         target: Player | Entity | World;
@@ -15,6 +17,8 @@ export declare class BooleanDynamicPropertyChangedEvent extends StorageChangedEv
         previousValue: boolean | undefined;
         currentValue: boolean | undefined;
         cancel: boolean;
+        cancelCache: Boolean;
+        cancelSet: Boolean;
     };
 }
 export declare const booleanDynamicPropertyChanged: BooleanDynamicPropertyChangedEvent;

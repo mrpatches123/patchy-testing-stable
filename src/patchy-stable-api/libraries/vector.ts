@@ -320,4 +320,10 @@ export class Vector {
 		}
 		return new Vector(max.x, max.y, max.z);
 	}
+	static floorVector(vector: Vector3) {
+		return new Vector(Math.floor(vector.x), Math.floor(vector.y), Math.floor(vector.z));
+	}
+	static equals(a: Vector3, b: Vector3) {
+		return a.x === b.x && a.y === b.y && a.z === b.z;
+	}
 }

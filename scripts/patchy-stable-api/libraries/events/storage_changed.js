@@ -1,14 +1,14 @@
 import { iterateObject } from "../utilities";
-export var StorageChangedType;
-(function (StorageChangedType) {
-    StorageChangedType["Number"] = "number";
-    StorageChangedType["Boolean"] = "boolean";
-    StorageChangedType["String"] = "string";
-    StorageChangedType["Vector3"] = "vector3";
-    StorageChangedType["JSON"] = "JSON";
-    StorageChangedType["Score"] = "score";
-    StorageChangedType["All"] = "all";
-})(StorageChangedType || (StorageChangedType = {}));
+import { DynamicPropertyTypes } from "../properties";
+var StorageChangedTypeNew;
+(function (StorageChangedTypeNew) {
+    StorageChangedTypeNew["Score"] = "score";
+    StorageChangedTypeNew["All"] = "all";
+})(StorageChangedTypeNew || (StorageChangedTypeNew = {}));
+export const StorageChangedType = {
+    ...StorageChangedTypeNew,
+    ...DynamicPropertyTypes,
+};
 export class StorageChangedEvent {
     currentSubscribeId = 0;
     subscriptions = {};
@@ -21,7 +21,7 @@ export class StorageChangedEvent {
         return subscribeId;
     }
     runEvent(target, key, type, previousValue, currentValue) {
-        const data = { target, key, type, previousValue, currentValue, cancel: false };
+        const data = { target, key, type, previousValue, currentValue, cancel: false, cancelCache: false, cancelSet: false };
         iterateObject(this.subscriptions, (id, callback) => callback(data));
         return data;
     }

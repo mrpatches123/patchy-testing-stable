@@ -2,10 +2,10 @@
  * @description perpetually iterates through an array one function call at a time
  */
 export declare class Iterate<T> {
-    private entities;
+    entities: T[];
     private entitiesRefresh;
     private iterator;
-    private i;
+    i: number;
     private getIterator;
     next(): T;
     nextWithData(): {

@@ -8,6 +8,8 @@ export declare class Vector3DynamicPropertyChangedEvent extends StorageChangedEv
         previousValue: Vector3 | undefined;
         currentValue: Vector3 | undefined;
         cancel: boolean;
+        cancelCache: Boolean;
+        cancelSet: Boolean;
     }) => void): number;
     runEvent(target: Player | Entity | World, key: string, previousValue: Vector3 | undefined, currentValue: Vector3 | undefined): {
         target: Player | Entity | World;
@@ -15,6 +17,8 @@ export declare class Vector3DynamicPropertyChangedEvent extends StorageChangedEv
         previousValue: Vector3 | undefined;
         currentValue: Vector3 | undefined;
         cancel: boolean;
+        cancelCache: Boolean;
+        cancelSet: Boolean;
     };
 }
 export declare const vector3DynamicPropertyChanged: Vector3DynamicPropertyChangedEvent;

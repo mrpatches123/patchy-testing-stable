@@ -35,6 +35,7 @@ export type ExtractParamTypesOptionalEnum<T extends {
 export declare class Command {
     static enums: Record<string, string[]>;
     static commands: [CustomCommand, Function][];
+    static beforeRegistrationEvents: (() => void)[];
     /**
      * Registers a custom command with the given parameters and callback function.
      * Make sure to as const the parameters to ensure type safety and proper inference of types.
@@ -43,5 +44,6 @@ export declare class Command {
         mandatoryParameters?: M;
         optionalParameters?: O;
     } & MyCustomCommand, cb: (origin: CustomCommandOrigin, ...data: [...ExtractParamTypesEnum<M>, ...ExtractParamTypesOptionalEnum<O>]) => CustomCommandResult | undefined | void | Promise<void>): void;
+    static subscribeBeforeRegistration(callback: () => void): void;
 }
 export {};

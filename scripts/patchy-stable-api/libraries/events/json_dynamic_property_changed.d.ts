@@ -8,6 +8,8 @@ export declare class JSONDynamicPropertyChangedEvent extends StorageChangedEvent
         previousValue: any | undefined;
         currentValue: any | undefined;
         cancel: boolean;
+        cancelCache: Boolean;
+        cancelSet: Boolean;
     }) => void): number;
     runEvent(target: Player | Entity | World, key: string, previousValue: any | undefined, currentValue: any | undefined): {
         target: Player | Entity | World;
@@ -15,6 +17,8 @@ export declare class JSONDynamicPropertyChangedEvent extends StorageChangedEvent
         previousValue: any | undefined;
         currentValue: any | undefined;
         cancel: boolean;
+        cancelCache: Boolean;
+        cancelSet: Boolean;
     };
 }
 export declare const jsonDynamicPropertyChanged: JSONDynamicPropertyChangedEvent;

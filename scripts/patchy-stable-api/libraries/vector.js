@@ -305,4 +305,10 @@ export class Vector {
         }
         return new Vector(max.x, max.y, max.z);
     }
+    static floorVector(vector) {
+        return new Vector(Math.floor(vector.x), Math.floor(vector.y), Math.floor(vector.z));
+    }
+    static equals(a, b) {
+        return a.x === b.x && a.y === b.y && a.z === b.z;
+    }
 }

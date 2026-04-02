@@ -7,6 +7,8 @@ export declare class StorageChangedEventTemplate {
         previousValue: any;
         currentValue: any;
         cancel: boolean;
+        cancelCache: Boolean;
+        cancelSet: Boolean;
     }) => void)>;
     protected currentSubscribes: number;
     protected runId: number | undefined;
@@ -16,6 +18,8 @@ export declare class StorageChangedEventTemplate {
         previousValue: number | boolean | string | Vector3 | undefined;
         currentValue: number | boolean | string | Vector3 | undefined;
         cancel: boolean;
+        cancelCache: Boolean;
+        cancelSet: Boolean;
     }) => void): number;
     runEvent(target: Player | Entity | World, key: string, previousValue: number | boolean | string | Vector3 | undefined, currentValue: number | boolean | string | Vector3 | undefined): {
         target: Player | Entity | World;
@@ -23,6 +27,8 @@ export declare class StorageChangedEventTemplate {
         previousValue: number | boolean | string | Vector3 | undefined;
         currentValue: number | boolean | string | Vector3 | undefined;
         cancel: boolean;
+        cancelCache: Boolean;
+        cancelSet: Boolean;
     };
     unsubscribe(id: number): void;
 }

@@ -612,14 +612,14 @@ export function systemRunIntervalAwaitCallback(callback: () => void | Promise<vo
 	let currentId: number | undefined;
 	const run = async () => {
 		if (stop) return;
-		try {
-			await callback();
-			if (stop) return;
-			currentId = system.runTimeout(run, tickDelay);
-		} catch (error: any) {
-			console.warn("Error below stack: ", error.stack);
-			throw error;
-		}
+		// try {
+		await callback();
+		if (stop) return;
+		currentId = system.runTimeout(run, tickDelay);
+		// } catch (error: any) {
+		// 	console.warn("Error below stack: ", error.stack);
+		// 	throw error;
+		// }
 	};
 	currentId = system.run(run);
 	return () => {

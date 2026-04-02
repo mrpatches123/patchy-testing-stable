@@ -7,21 +7,22 @@ export declare class Storage {
     get(target: Player): EntityStorageManager;
     constructor();
 }
-declare enum DynamicPropertyTypes {
-    string = "string",
-    number = "number",
-    boolean = "boolean",
-    vector3 = "vector3",
-    json = "json"
+export declare enum DynamicPropertyTypes {
+    String = "string",
+    Number = "number",
+    Boolean = "boolean",
+    Vector3 = "vector3",
+    JSON = "json"
 }
 declare class DynamicPropertyManager {
     dynamicProperties: Record<string, {
         type?: DynamicPropertyTypes;
-        value?: number | boolean | Vector3 | string;
+        value?: number | boolean | Vector3 | string | any;
         gotten?: boolean;
     }>;
     protected root: Player | Entity | World;
     constructor(root: Player | Entity | World);
+    private setInternal;
     setString(key: string, value?: string): void;
     getString(key: string): string | undefined;
     setJSON(key: string, value?: any): void;
@@ -32,6 +33,7 @@ declare class DynamicPropertyManager {
     getBoolean(key: string): boolean | undefined;
     setVector3(key: string, value?: Vector3): void;
     getVector3(key: string): Vector3 | undefined;
+    private removeInternal;
     removeString(key: string): void;
     removeJSON(key: string): void;
     removeNumber(key: string): void;

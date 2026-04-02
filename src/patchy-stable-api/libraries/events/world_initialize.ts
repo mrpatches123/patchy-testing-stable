@@ -21,7 +21,7 @@ export class WorldInitializeEvent {
 				if (!player) return;
 				const { successCount } = await player.runCommand("testfor @s");
 				if (!successCount) return;
-				console.warn('world_initialised');
+				// console.warn('world_initialised');
 				iterateObject(thisWorldInit.subscriptions, (id, callback) => callback());
 				system.clearRun(thisWorldInit.runId!);
 			} catch (error: any) {

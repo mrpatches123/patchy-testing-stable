@@ -6,6 +6,7 @@ function isAsync(fn) {
 export class Command {
     static enums = {};
     static commands = [];
+    static beforeRegistrationEvents = [];
     /**
      * Registers a custom command with the given parameters and callback function.
      * Make sure to as const the parameters to ensure type safety and proper inference of types.
@@ -26,14 +27,20 @@ export class Command {
         });
         Command.commands.push([newArgs, cb]);
     }
+    static subscribeBeforeRegistration(callback) {
+        Command.beforeRegistrationEvents.push(callback);
+    }
 }
 system.beforeEvents.startup.subscribe((event) => {
+    Command.beforeRegistrationEvents.forEach(callback => {
+        callback?.();
+    });
     Object.entries(Command.enums).forEach(([name, enumArray]) => {
         event.customCommandRegistry.registerEnum(name, enumArray);
     });
     Command.commands.forEach(([newArgs, cb]) => {
         event.customCommandRegistry.registerCommand(newArgs, ((...result) => {
-            console.warn({ t: "3938", result });
+            // console.warn({ t: "3938", result });
             const callback = cb;
             if (isAsync(callback)) {
                 callback(...result);

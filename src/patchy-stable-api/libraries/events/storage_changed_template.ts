@@ -3,18 +3,18 @@ import { fixPlayerScore, iterateObject } from "../utilities";
 import { worldInitialize } from "./world_initialize";
 export class StorageChangedEventTemplate {
 	protected currentSubscribeId = 0;
-	protected subscriptions: Record<number, ((data: { target: Player | Entity | World, key: string, previousValue: any, currentValue: any, cancel: boolean; }) => void)> = {};
+	protected subscriptions: Record<number, ((data: { target: Player | Entity | World, key: string, previousValue: any, currentValue: any, cancel: boolean, cancelCache: Boolean, cancelSet: Boolean; }) => void)> = {};
 	protected currentSubscribes = 0;
 	protected runId: number | undefined;
-	subscribe(callback: (data: { target: Player | Entity | World, key: string, previousValue: number | boolean | string | Vector3 | undefined, currentValue: number | boolean | string | Vector3 | undefined, cancel: boolean; }) => void) {
+	subscribe(callback: (data: { target: Player | Entity | World, key: string, previousValue: number | boolean | string | Vector3 | undefined, currentValue: number | boolean | string | Vector3 | undefined, cancel: boolean, cancelCache: Boolean, cancelSet: Boolean; }) => void) {
 		const subscribeId = this.currentSubscribeId++;
 		this.subscriptions[subscribeId] = callback;
 		this.currentSubscribes++;
 		return subscribeId;
 	}
 	runEvent(target: Player | Entity | World, key: string, previousValue: number | boolean | string | Vector3 | undefined, currentValue: number | boolean | string | Vector3 | undefined)
-		: { target: Player | Entity | World, key: string, previousValue: number | boolean | string | Vector3 | undefined, currentValue: number | boolean | string | Vector3 | undefined, cancel: boolean; } {
-		const data = { target, key, previousValue, currentValue, cancel: false };
+		: { target: Player | Entity | World, key: string, previousValue: number | boolean | string | Vector3 | undefined, currentValue: number | boolean | string | Vector3 | undefined, cancel: boolean, cancelCache: Boolean, cancelSet: Boolean; } {
+		const data = { target, key, previousValue, currentValue, cancel: false, cancelCache: false, cancelSet: false };
 		iterateObject(this.subscriptions, (id, callback) => callback(data));
 		return data;
 	}

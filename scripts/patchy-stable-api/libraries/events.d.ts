@@ -1,4 +1,3 @@
-export { StorageChangedType } from './events/storage_changed.js';
 export declare const customEvents: {
     readonly worldInitialize: import("./events/world_initialize.js").WorldInitializeEvent;
     readonly playerJoined: import("./events/player_joined.js").PlayerJoinedEvent;

@@ -11,7 +11,7 @@ export class JSONDynamicPropertyChangedEvent extends StorageChangedEventTemplate
         return subscribeId;
     }
     runEvent(target, key, previousValue, currentValue) {
-        const data = { target, key, previousValue, currentValue, cancel: false };
+        const data = { target, key, previousValue, currentValue, cancel: false, cancelCache: false, cancelSet: false };
         iterateObject(this.subscriptions, (id, callback) => callback(data));
         return data;
     }

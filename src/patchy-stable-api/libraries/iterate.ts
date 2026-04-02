@@ -2,11 +2,11 @@
  * @description perpetually iterates through an array one function call at a time
  */
 export class Iterate<T> {
-	private entities: T[] = [];
+	entities: T[] = [];
 
 	private entitiesRefresh: () => T[];
 	private iterator = this.getIterator();
-	private i = 0;
+	i = 0;
 	private getIterator() {
 		const thisIterate = this;
 		return (function* () {

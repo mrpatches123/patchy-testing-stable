@@ -1,6 +1,7 @@
 import { Player, World, world } from "@minecraft/server";
 import { chunkString, isDefined, isVector3 } from "./utilities";
-import { StorageChangedType, customEvents } from "./events";
+import { customEvents } from "./events";
+import { StorageChangedType } from "./events/storage_changed";
 export class Storage {
     managers = { 'world': new WorldStorageManager(world) };
     get(target) {
@@ -26,13 +27,13 @@ export class Storage {
         });
     }
 }
-var DynamicPropertyTypes;
+export var DynamicPropertyTypes;
 (function (DynamicPropertyTypes) {
-    DynamicPropertyTypes["string"] = "string";
-    DynamicPropertyTypes["number"] = "number";
-    DynamicPropertyTypes["boolean"] = "boolean";
-    DynamicPropertyTypes["vector3"] = "vector3";
-    DynamicPropertyTypes["json"] = "json";
+    DynamicPropertyTypes["String"] = "string";
+    DynamicPropertyTypes["Number"] = "number";
+    DynamicPropertyTypes["Boolean"] = "boolean";
+    DynamicPropertyTypes["Vector3"] = "vector3";
+    DynamicPropertyTypes["JSON"] = "json";
 })(DynamicPropertyTypes || (DynamicPropertyTypes = {}));
 const fixObjectiveName = '$entity$_$storage234';
 let fixObjective;
@@ -51,77 +52,89 @@ class DynamicPropertyManager {
     constructor(root) {
         this.root = root;
     }
-    setString(key, value) {
-        if (typeof key !== 'string')
-            throw new Error('key is not of type string');
-        if (isDefined(value) && typeof value !== 'string')
-            throw new Error('value is defined and is not of type string');
-        const { type = DynamicPropertyTypes.string, gotten = false } = this.dynamicProperties[key] ?? {};
-        if (type !== DynamicPropertyTypes.string)
+    setInternal(key, value, data) {
+        const { type, specificEvent, removeFunction, getFunction, typeCheck, setFunction } = data;
+        if (typeof key !== "string")
+            throw new Error(`key is not of type string`);
+        if (isDefined(value) && !typeCheck(value))
+            throw new Error(`value is defined and is not of type: ${type}`);
+        const { type: typeCached = type, gotten = false } = this.dynamicProperties[key] ?? {};
+        if (typeCached !== type)
             throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
+        let cancel, cancelCache, cancelSet = false;
         if (!isDefined(value))
-            return this.removeString(key);
-        let cancel = false;
-        cancel = customEvents.stringDynamicPropertyChanged.runEvent(this.root, key, this.getString(key), value).cancel;
-        cancel = customEvents.storageChanged.runEvent(this.root, key, StorageChangedType.String, this.getString(key), value).cancel;
+            return removeFunction(key);
+        const gottenValue = getFunction(key);
+        const { cancel: cancelSpecific, cancelCache: cancelCacheSpecific, cancelSet: cancelSetSpecific } = specificEvent.runEvent(this.root, key, gottenValue, value);
+        const { cancel: cancelStorage, cancelCache: cancelCacheStorage, cancelSet: cancelSetStorage } = customEvents.storageChanged.runEvent(this.root, key, type, gottenValue, value);
+        cancel = cancelSpecific || cancelStorage;
+        cancelCache = cancelCacheSpecific || cancelCacheStorage;
+        cancelSet = cancelSetSpecific || cancelSetStorage;
         if (cancel)
             return;
-        this.dynamicProperties[key] ??= {};
-        this.dynamicProperties[key].type = DynamicPropertyTypes.string;
-        this.dynamicProperties[key].value = value;
-        this.dynamicProperties[key].gotten = true;
-        this.root.setDynamicProperty(key, value);
+        if (!cancelCache) {
+            this.dynamicProperties[key] ??= {};
+            this.dynamicProperties[key].type = type;
+            this.dynamicProperties[key].value = value;
+            this.dynamicProperties[key].gotten = true;
+        }
+        if (cancelSet)
+            return;
+        setFunction(key, value);
+    }
+    setString(key, value) {
+        this.setInternal(key, value ?? undefined, {
+            getFunction: this.getString.bind(this),
+            specificEvent: customEvents.stringDynamicPropertyChanged,
+            removeFunction: this.removeString.bind(this),
+            type: DynamicPropertyTypes.String,
+            typeCheck: (value) => typeof value === "string",
+            setFunction: this.root.setDynamicProperty.bind(this.root)
+        });
     }
     getString(key) {
         if (typeof key !== 'string')
             throw new Error('key is not of type string');
-        const { type = DynamicPropertyTypes.string, gotten = false } = this.dynamicProperties[key] ?? {};
+        const { type = DynamicPropertyTypes.String, gotten = false } = this.dynamicProperties[key] ?? {};
         this.dynamicProperties[key] ??= {};
-        if (type !== DynamicPropertyTypes.string)
+        if (type !== DynamicPropertyTypes.String)
             throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
         if (!gotten) {
             this.dynamicProperties[key].gotten = true;
             this.dynamicProperties[key].value = this.root.getDynamicProperty(key);
-            this.dynamicProperties[key].type = DynamicPropertyTypes.string;
+            this.dynamicProperties[key].type = DynamicPropertyTypes.String;
         }
         return this.dynamicProperties[key]?.value;
     }
     setJSON(key, value) {
-        if (typeof key !== 'string')
-            throw new Error('key is not of type string');
-        const { type = DynamicPropertyTypes.json, gotten = false } = this.dynamicProperties[key] ?? {};
-        if (type !== DynamicPropertyTypes.json)
-            throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
-        if (!isDefined(value))
-            return this.removeJSON(key);
-        let cancel = false;
-        cancel = customEvents.jsonDynamicPropertyChanged.runEvent(this.root, key, this.getJSON(key), value).cancel;
-        cancel = customEvents.storageChanged.runEvent(this.root, key, StorageChangedType.JSON, this.getJSON(key), value).cancel;
-        if (cancel)
-            return;
-        this.dynamicProperties[key] ??= {};
-        this.dynamicProperties[key].type = DynamicPropertyTypes.json;
-        this.dynamicProperties[key].value = value;
-        this.dynamicProperties[key].gotten = true;
-        const stringValue = JSON.stringify(value);
-        const chunks = chunkString(stringValue, chunkAmountJSON);
-        const previousChunks = (this.root.getDynamicProperty(`${key}_chunks`) ?? 0);
-        if (previousChunks > chunks.length) {
-            for (let i = chunks.length; i < previousChunks; i++) {
-                this.root.setDynamicProperty(`${key}_${i}`, undefined);
+        this.setInternal(key, value ?? undefined, {
+            getFunction: this.getJSON.bind(this),
+            specificEvent: customEvents.jsonDynamicPropertyChanged,
+            removeFunction: this.removeJSON.bind(this),
+            type: DynamicPropertyTypes.JSON,
+            typeCheck: (value) => true,
+            setFunction: (key, value) => {
+                const stringValue = JSON.stringify(value);
+                const chunks = chunkString(stringValue, chunkAmountJSON);
+                const previousChunks = (this.root.getDynamicProperty(`${key}_chunks`) ?? 0);
+                if (previousChunks > chunks.length) {
+                    for (let i = chunks.length; i < previousChunks; i++) {
+                        this.root.setDynamicProperty(`${key}_${i}`, undefined);
+                    }
+                }
+                chunks.forEach((chunk, index) => {
+                    this.root.setDynamicProperty(`${key}_${index}`, chunk);
+                });
+                this.root.setDynamicProperty(`${key}_chunks`, chunks.length);
             }
-        }
-        chunks.forEach((chunk, index) => {
-            this.root.setDynamicProperty(`${key}_${index}`, chunk);
         });
-        this.root.setDynamicProperty(`${key}_chunks`, chunks.length);
     }
     getJSON(key) {
         if (typeof key !== 'string')
             throw new Error('key is not of type string');
-        const { type = DynamicPropertyTypes.json, gotten = false } = this.dynamicProperties[key] ?? {};
+        const { type = DynamicPropertyTypes.JSON, gotten = false } = this.dynamicProperties[key] ?? {};
         this.dynamicProperties[key] ??= {};
-        if (type !== DynamicPropertyTypes.json)
+        if (type !== DynamicPropertyTypes.JSON)
             throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
         if (!gotten) {
             const chunks = Array.from({ length: (this.root.getDynamicProperty(`${key}_chunks`) ?? 0) }, (_, index) => this.root.getDynamicProperty(`${key}_${index}`));
@@ -133,202 +146,152 @@ class DynamicPropertyManager {
                 // console.warn(`Error parsing JSON for key: ${key}, ${error.stack}`);
                 this.dynamicProperties[key].value = undefined;
             }
-            this.dynamicProperties[key].type = DynamicPropertyTypes.json;
+            this.dynamicProperties[key].type = DynamicPropertyTypes.JSON;
         }
         return this.dynamicProperties[key]?.value;
     }
     setNumber(key, value) {
-        if (typeof key !== 'string')
-            throw new Error('key is not of type string');
-        if (isDefined(value) && typeof value !== 'number')
-            throw new Error('value is defined and is not of type number');
-        const { type = DynamicPropertyTypes.number, gotten = false } = this.dynamicProperties[key] ?? {};
-        if (type !== DynamicPropertyTypes.number)
-            throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
-        if (!isDefined(value))
-            return this.removeNumber(key);
-        let cancel = false;
-        cancel = customEvents.numberDynamicPropertyChanged.runEvent(this.root, key, this.getNumber(key), value).cancel;
-        cancel = customEvents.storageChanged.runEvent(this.root, key, StorageChangedType.Number, this.getNumber(key), value).cancel;
-        if (cancel)
-            return;
-        this.dynamicProperties[key] ??= {};
-        this.dynamicProperties[key].type = DynamicPropertyTypes.number;
-        this.dynamicProperties[key].value = value;
-        this.dynamicProperties[key].gotten = true;
-        this.root.setDynamicProperty(key, value);
+        this.setInternal(key, value ?? undefined, {
+            getFunction: this.getNumber.bind(this),
+            specificEvent: customEvents.numberDynamicPropertyChanged,
+            removeFunction: this.removeNumber.bind(this),
+            type: DynamicPropertyTypes.Number,
+            typeCheck: (value) => typeof value === "number",
+            setFunction: this.root.setDynamicProperty.bind(this.root)
+        });
     }
     getNumber(key) {
         if (typeof key !== 'string')
             throw new Error('key is not of type string');
-        const { type = DynamicPropertyTypes.number, gotten = false } = this.dynamicProperties[key] ?? {};
+        const { type = DynamicPropertyTypes.Number, gotten = false } = this.dynamicProperties[key] ?? {};
         this.dynamicProperties[key] ??= {};
-        if (type !== DynamicPropertyTypes.number)
+        if (type !== DynamicPropertyTypes.Number)
             throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
         if (!gotten) {
             this.dynamicProperties[key].gotten = true;
             this.dynamicProperties[key].value = this.root.getDynamicProperty(key);
-            this.dynamicProperties[key].type = DynamicPropertyTypes.number;
+            this.dynamicProperties[key].type = DynamicPropertyTypes.Number;
         }
         return this.dynamicProperties[key]?.value;
     }
     setBoolean(key, value) {
-        if (typeof key !== 'string')
-            throw new Error('key is not of type string');
-        if (isDefined(value) && typeof value !== 'boolean')
-            throw new Error('value is defined and is not of type boolean');
-        const { type = DynamicPropertyTypes.boolean, gotten = false } = this.dynamicProperties[key] ?? {};
-        if (type !== DynamicPropertyTypes.boolean)
-            throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
-        if (!isDefined(value))
-            return this.removeBoolean(key);
-        let cancel = false;
-        cancel = customEvents.booleanDynamicPropertyChanged.runEvent(this.root, key, this.getBoolean(key), value).cancel;
-        cancel = customEvents.storageChanged.runEvent(this.root, key, StorageChangedType.Boolean, this.getBoolean(key), value).cancel;
-        if (cancel)
-            return;
-        this.dynamicProperties[key] ??= {};
-        this.dynamicProperties[key].type = DynamicPropertyTypes.boolean;
-        this.dynamicProperties[key].value = value;
-        this.dynamicProperties[key].gotten = true;
-        this.root.setDynamicProperty(key, value);
+        this.setInternal(key, value ?? undefined, {
+            getFunction: this.getBoolean.bind(this),
+            specificEvent: customEvents.booleanDynamicPropertyChanged,
+            removeFunction: this.removeBoolean.bind(this),
+            type: DynamicPropertyTypes.Boolean,
+            typeCheck: (value) => typeof value === "boolean",
+            setFunction: this.root.setDynamicProperty.bind(this.root)
+        });
     }
     getBoolean(key) {
         if (typeof key !== 'string')
             throw new Error('key is not of type string');
-        const { type = DynamicPropertyTypes.boolean, gotten = false } = this.dynamicProperties[key] ?? {};
+        const { type = DynamicPropertyTypes.Boolean, gotten = false } = this.dynamicProperties[key] ?? {};
         this.dynamicProperties[key] ??= {};
-        if (type !== DynamicPropertyTypes.boolean)
+        if (type !== DynamicPropertyTypes.Boolean)
             throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
         if (!gotten) {
             this.dynamicProperties[key].gotten = true;
             this.dynamicProperties[key].value = this.root.getDynamicProperty(key);
-            this.dynamicProperties[key].type = DynamicPropertyTypes.boolean;
+            this.dynamicProperties[key].type = DynamicPropertyTypes.Boolean;
         }
         return this.dynamicProperties[key]?.value;
     }
     setVector3(key, value) {
-        if (typeof key !== 'string')
-            throw new Error('key is not of type string');
-        if (isDefined(value) && !(isVector3(value)))
-            throw new Error('value is defined and is not of type Vector3');
-        const { type = DynamicPropertyTypes.vector3, gotten = false } = this.dynamicProperties[key] ?? {};
-        if (type !== DynamicPropertyTypes.vector3)
-            throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
-        if (!isDefined(value))
-            return this.removeVector3(key);
-        let cancel = false;
-        cancel = customEvents.vector3DynamicPropertyChanged.runEvent(this.root, key, this.getVector3(key), value).cancel;
-        cancel = customEvents.storageChanged.runEvent(this.root, key, StorageChangedType.Vector3, this.getVector3(key), value).cancel;
-        if (cancel)
-            return;
-        this.dynamicProperties[key] ??= {};
-        this.dynamicProperties[key].type = DynamicPropertyTypes.vector3;
-        this.dynamicProperties[key].value = value;
-        this.dynamicProperties[key].gotten = true;
-        this.root.setDynamicProperty(key, value);
+        this.setInternal(key, value ?? undefined, {
+            getFunction: this.getVector3.bind(this),
+            specificEvent: customEvents.vector3DynamicPropertyChanged,
+            removeFunction: this.removeVector3.bind(this),
+            type: DynamicPropertyTypes.Vector3,
+            typeCheck: isVector3,
+            setFunction: this.root.setDynamicProperty.bind(this.root)
+        });
     }
     getVector3(key) {
         if (typeof key !== 'string')
             throw new Error('key is not of type string');
-        const { type = DynamicPropertyTypes.vector3, gotten = false } = this.dynamicProperties[key] ?? {};
+        const { type = DynamicPropertyTypes.Vector3, gotten = false } = this.dynamicProperties[key] ?? {};
         this.dynamicProperties[key] ??= {};
-        if (type !== DynamicPropertyTypes.vector3)
+        if (type !== DynamicPropertyTypes.Vector3)
             throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
         if (!gotten) {
             this.dynamicProperties[key].gotten = true;
             this.dynamicProperties[key].value = this.root.getDynamicProperty(key);
-            this.dynamicProperties[key].type = DynamicPropertyTypes.vector3;
+            this.dynamicProperties[key].type = DynamicPropertyTypes.Vector3;
         }
         return this.dynamicProperties[key]?.value;
     }
-    removeString(key) {
-        if (typeof key !== 'string')
-            throw new Error('key is not of type string');
-        const { type = DynamicPropertyTypes.string, gotten = false } = this.dynamicProperties[key] ?? {};
-        if (type !== DynamicPropertyTypes.string)
+    removeInternal(key, data) {
+        const { type, specificEvent, removeFunction, getFunction } = data;
+        if (typeof key !== "string")
+            throw new Error(`key is not of type string`);
+        const { type: typeCached = type, gotten = false } = this.dynamicProperties[key] ?? {};
+        if (typeCached !== type)
             throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
-        let cancel = false;
-        cancel = customEvents.stringDynamicPropertyChanged.runEvent(this.root, key, this.getString(key), undefined).cancel;
-        cancel = customEvents.storageChanged.runEvent(this.root, key, StorageChangedType.String, this.getString(key), undefined).cancel;
+        let cancel, cancelCache, cancelSet = false;
+        const gottenValue = getFunction(key);
+        const { cancel: cancelSpecific, cancelCache: cancelCacheSpecific, cancelSet: cancelSetSpecific } = specificEvent.runEvent(this.root, key, gottenValue, undefined);
+        const { cancel: cancelStorage, cancelCache: cancelCacheStorage, cancelSet: cancelSetStorage } = customEvents.storageChanged.runEvent(this.root, key, type, gottenValue, undefined);
+        cancel = cancelSpecific || cancelStorage;
+        cancelCache = cancelCacheSpecific || cancelCacheStorage;
+        cancelSet = cancelSetSpecific || cancelSetStorage;
         if (cancel)
             return;
-        this.root.setDynamicProperty(key);
-        this.dynamicProperties[key] ??= {};
-        this.dynamicProperties[key].type = DynamicPropertyTypes.string;
-        this.dynamicProperties[key].gotten = true;
-        delete this.dynamicProperties[key].value;
+        if (!cancelCache) {
+            this.dynamicProperties[key] ??= {};
+            this.dynamicProperties[key].type = type;
+            this.dynamicProperties[key].gotten = true;
+            delete this.dynamicProperties[key].value;
+        }
+        if (cancelSet)
+            return;
+        removeFunction(key);
+    }
+    removeString(key) {
+        this.removeInternal(key, {
+            getFunction: this.getString.bind(this),
+            specificEvent: customEvents.stringDynamicPropertyChanged,
+            type: DynamicPropertyTypes.String,
+            removeFunction: this.root.setDynamicProperty.bind(this.root),
+        });
     }
     removeJSON(key) {
-        if (typeof key !== 'string')
-            throw new Error('key is not of type string');
-        const { type = DynamicPropertyTypes.json, gotten = false } = this.dynamicProperties[key] ?? {};
-        if (type !== DynamicPropertyTypes.json)
-            throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
-        let cancel = false;
-        cancel = customEvents.jsonDynamicPropertyChanged.runEvent(this.root, key, this.getJSON(key), undefined).cancel;
-        cancel = customEvents.storageChanged.runEvent(this.root, key, StorageChangedType.JSON, this.getJSON(key), undefined).cancel;
-        if (cancel)
-            return;
-        this.dynamicProperties[key] ??= {};
-        this.dynamicProperties[key].type = DynamicPropertyTypes.json;
-        this.dynamicProperties[key].gotten = true;
-        delete this.dynamicProperties[key].value;
-        const previousChunks = (this.root.getDynamicProperty(`${key}_chunks`) ?? 0);
-        for (let i = 0; i < previousChunks; i++) {
-            this.root.setDynamicProperty(`${key}_${i}`, undefined);
-        }
+        this.removeInternal(key, {
+            getFunction: this.getJSON.bind(this),
+            specificEvent: customEvents.jsonDynamicPropertyChanged,
+            type: DynamicPropertyTypes.JSON,
+            removeFunction: (key) => {
+                const previousChunks = (this.root.getDynamicProperty(`${key}_chunks`) ?? 0);
+                for (let i = 0; i < previousChunks; i++) {
+                    this.root.setDynamicProperty(`${key}_${i}`, undefined);
+                }
+            }
+        });
     }
     removeNumber(key) {
-        if (typeof key !== 'string')
-            throw new Error('key is not of type string');
-        const { type = DynamicPropertyTypes.number, gotten = false } = this.dynamicProperties[key] ?? {};
-        if (type !== DynamicPropertyTypes.number)
-            throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
-        let cancel = false;
-        cancel = customEvents.numberDynamicPropertyChanged.runEvent(this.root, key, this.getNumber(key), undefined).cancel;
-        cancel = customEvents.storageChanged.runEvent(this.root, key, StorageChangedType.Number, this.getNumber(key), undefined).cancel;
-        if (cancel)
-            return;
-        this.root.setDynamicProperty(key);
-        this.dynamicProperties[key] ??= {};
-        this.dynamicProperties[key].type = DynamicPropertyTypes.number;
-        this.dynamicProperties[key].gotten = true;
-        delete this.dynamicProperties[key].value;
+        this.removeInternal(key, {
+            getFunction: this.getNumber.bind(this),
+            specificEvent: customEvents.numberDynamicPropertyChanged,
+            type: DynamicPropertyTypes.Number,
+            removeFunction: this.root.setDynamicProperty.bind(this.root),
+        });
     }
     removeBoolean(key) {
-        if (typeof key !== 'string')
-            throw new Error('key is not of type string');
-        const { type = DynamicPropertyTypes.boolean, gotten = false } = this.dynamicProperties[key] ?? {};
-        if (type !== DynamicPropertyTypes.boolean)
-            throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
-        let cancel = false;
-        cancel = customEvents.booleanDynamicPropertyChanged.runEvent(this.root, key, this.getBoolean(key), undefined).cancel;
-        cancel = customEvents.storageChanged.runEvent(this.root, key, StorageChangedType.Boolean, this.getBoolean(key), undefined).cancel;
-        if (cancel)
-            return;
-        this.root.setDynamicProperty(key);
-        this.dynamicProperties[key] ??= {};
-        this.dynamicProperties[key].type = DynamicPropertyTypes.boolean;
-        this.dynamicProperties[key].gotten = true;
-        delete this.dynamicProperties[key].value;
+        this.removeInternal(key, {
+            getFunction: this.getBoolean.bind(this),
+            specificEvent: customEvents.booleanDynamicPropertyChanged,
+            type: DynamicPropertyTypes.Boolean,
+            removeFunction: this.root.setDynamicProperty.bind(this.root),
+        });
     }
     removeVector3(key) {
-        if (typeof key !== 'string')
-            throw new Error('key is not of type string');
-        const { type = DynamicPropertyTypes.vector3, gotten = false } = this.dynamicProperties[key] ?? {};
-        if (type !== DynamicPropertyTypes.vector3)
-            throw new Error(`key is assigned to type: ${this.dynamicProperties[key]?.type}`);
-        let cancel = false;
-        cancel = customEvents.vector3DynamicPropertyChanged.runEvent(this.root, key, this.getVector3(key), undefined).cancel;
-        cancel = customEvents.storageChanged.runEvent(this.root, key, StorageChangedType.Vector3, this.getVector3(key), undefined).cancel;
-        if (cancel)
-            return;
-        this.root.setDynamicProperty(key);
-        this.dynamicProperties[key] ??= {};
-        this.dynamicProperties[key].type = DynamicPropertyTypes.vector3;
-        this.dynamicProperties[key].gotten = true;
-        delete this.dynamicProperties[key].value;
+        this.removeInternal(key, {
+            getFunction: this.getVector3.bind(this),
+            specificEvent: customEvents.vector3DynamicPropertyChanged,
+            type: DynamicPropertyTypes.Vector3,
+            removeFunction: this.root.setDynamicProperty.bind(this.root),
+        });
     }
     /**
      * runs storageChanged event for all keys
@@ -339,22 +302,22 @@ class DynamicPropertyManager {
             let previousValue;
             let type = StorageChangedType.All;
             switch (this.dynamicProperties[key]?.type) {
-                case DynamicPropertyTypes.string:
+                case DynamicPropertyTypes.String:
                     previousValue = this.getString(key);
                     cancel = customEvents.stringDynamicPropertyChanged.runEvent(this.root, key, previousValue, undefined).cancel;
                     type = StorageChangedType.String;
                     break;
-                case DynamicPropertyTypes.number:
+                case DynamicPropertyTypes.Number:
                     previousValue = this.getNumber(key);
                     cancel = customEvents.numberDynamicPropertyChanged.runEvent(this.root, key, previousValue, undefined).cancel;
                     type = StorageChangedType.Number;
                     break;
-                case DynamicPropertyTypes.boolean:
+                case DynamicPropertyTypes.Boolean:
                     previousValue = this.getBoolean(key);
                     cancel = customEvents.booleanDynamicPropertyChanged.runEvent(this.root, key, previousValue, undefined).cancel;
                     type = StorageChangedType.Boolean;
                     break;
-                case DynamicPropertyTypes.vector3:
+                case DynamicPropertyTypes.Vector3:
                     previousValue = this.getVector3(key);
                     cancel = customEvents.vector3DynamicPropertyChanged.runEvent(this.root, key, previousValue, undefined).cancel;
                     type = StorageChangedType.Vector3;

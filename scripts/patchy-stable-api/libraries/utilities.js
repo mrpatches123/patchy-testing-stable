@@ -651,16 +651,15 @@ export function systemRunIntervalAwaitCallback(callback, tickDelay = 0) {
     const run = async () => {
         if (stop)
             return;
-        try {
-            await callback();
-            if (stop)
-                return;
-            currentId = system.runTimeout(run, tickDelay);
-        }
-        catch (error) {
-            console.warn("Error below stack: ", error.stack);
-            throw error;
-        }
+        // try {
+        await callback();
+        if (stop)
+            return;
+        currentId = system.runTimeout(run, tickDelay);
+        // } catch (error: any) {
+        // 	console.warn("Error below stack: ", error.stack);
+        // 	throw error;
+        // }
     };
     currentId = system.run(run);
     return () => {

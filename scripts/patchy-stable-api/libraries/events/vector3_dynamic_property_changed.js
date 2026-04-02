@@ -11,7 +11,7 @@ export class Vector3DynamicPropertyChangedEvent extends StorageChangedEventTempl
         return subscribeId;
     }
     runEvent(target, key, previousValue, currentValue) {
-        const data = { target, previousValue, key, currentValue, cancel: false };
+        const data = { target, previousValue, key, currentValue, cancel: false, cancelCache: false, cancelSet: false };
         iterateObject(this.subscriptions, (id, callback) => callback(data));
         return data;
     }

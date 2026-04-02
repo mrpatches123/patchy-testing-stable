@@ -8,6 +8,8 @@ export declare class NumberDynamicPropertyChangedEvent extends StorageChangedEve
         previousValue: number | undefined;
         currentValue: number | undefined;
         cancel: boolean;
+        cancelCache: Boolean;
+        cancelSet: Boolean;
     }) => void): number;
     runEvent(target: Player | Entity | World, key: string, previousValue: number | undefined, currentValue: number | undefined): {
         target: Player | Entity | World;
@@ -15,6 +17,8 @@ export declare class NumberDynamicPropertyChangedEvent extends StorageChangedEve
         previousValue: number | undefined;
         currentValue: number | undefined;
         cancel: boolean;
+        cancelCache: Boolean;
+        cancelSet: Boolean;
     };
 }
 export declare const numberDynamicPropertyChanged: NumberDynamicPropertyChangedEvent;

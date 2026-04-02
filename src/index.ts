@@ -85,11 +85,13 @@ const itemsFunctions: Record<string, (source: Player) => void> = {
 // world.beforeEvents.playerBreakBlock.subscribe((event) => {
 // 	event.cancel = true;
 // });
-try {
-	world.scoreboard.addObjective("test");
-} catch (e) {
+customEvents.worldInitialize.subscribe(() => {
+	try {
+		world.scoreboard.addObjective("test");
+	} catch (e) {
 
-}
+	}
+});
 let i = 0;
 const locations = [{ x: 449, y: 71, z: 193 }, { x: 449, y: 72, z: 165 }, { x: 476, y: 72, z: 176 }, { x: 444, y: 72, z: 169 }, { x: 455, y: 73, z: 160 }, { x: 460, y: 71, z: 178 }, { x: 453, y: 72, z: 172 }, { x: 465, y: 74, z: 155 }, { x: 479, y: 69, z: 167 }, { x: 444, y: 72, z: 182 }, { x: 467, y: 72, z: 172 }, { x: 480, y: 71, z: 200 }, { x: 460, y: 71, z: 193 }, { x: 441, y: 72, z: 160 }, { x: 423, y: 71, z: 182 }];
 system.afterEvents.scriptEventReceive.subscribe(async (event) => {
@@ -115,8 +117,8 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 
 	switch (message) {
 		case "set": {
+			playerStorage.jsons.test0 = { "whjdwhj": "wdwdw", awd: [1, 2, 3] };
 			playerStorage.scores.test = 1;
-
 			playerStorage.booleans.test1 = true;
 			playerStorage.numbers.test2 = 5;
 			playerStorage.vector3s.test3 = { "x": 1, "y": 2, "z": 3 };
@@ -128,6 +130,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 			const { numbers } = playerStorage;
 			console.warn(numbers.test2);
 			sourceEntity.sendMessage(JSON.stringify({
+				json: playerStorage.jsons.test0 ?? "null",
 				score: playerStorage.scores.test ?? "null",
 				bool: playerStorage.booleans.test1 ?? "null",
 				number: playerStorage.numbers.test2 ?? "null",
@@ -170,15 +173,16 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 		}
 	}
 });
-const cowIterate = new Iterate(() => overworld.getEntities({ type: MinecraftEntityTypes.Cow }));
+// const cowIterate = new Iterate(() => overworld.getEntities({ type: MinecraftEntityTypes.Cow }));
 
-system.runInterval(() => {
+// system.runInterval(() => {
 
-	const { value: cow, isLast, index: i } = cowIterate.nextWithData();
-	console.warn(JSON.stringify({ cow: cow?.id ?? "null", isLast }));
-	if (!cow || !cow.isValid) return;
-	let timer = Timer.getFromEntity(cow, "testTimer");
-	if (timer === false) return;
-	timer ??= new Timer().setCountDown(30000);
-	timer.saveToEntity(cow, "testTimer");
-}, 10);
+// 	const { value: cow, isLast, index: i } = cowIterate.nextWithData();
+// 	console.warn(JSON.stringify({ cow: cow?.id ?? "null", isLast }));
+// 	if (!cow || !cow.isValid) return;
+// 	let timer = Timer.getFromEntity(cow, "testTimer");
+// 	if (timer === false) return;
+// 	timer ??= new Timer().setCountDown(30000);
+// 	timer.saveToEntity(cow, "testTimer");
+// }, 10);
+
