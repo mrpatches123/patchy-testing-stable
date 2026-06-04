@@ -391,7 +391,7 @@ class DynamicPropertyManager {
 		});
 	}
 }
-class EntityStorageManager extends DynamicPropertyManager {
+export class EntityStorageManager extends DynamicPropertyManager {
 
 	setScore(key: string, value?: number) {
 		if (typeof key !== 'string') throw new Error('key is not of type string');
@@ -471,7 +471,7 @@ class EntityStorageManager extends DynamicPropertyManager {
 	}
 
 }
-class WorldStorageManager extends DynamicPropertyManager {
+export class WorldStorageManager extends DynamicPropertyManager {
 	protected root: World;
 	protected scoresStorage: Record<string, Record<string, { objective?: ScoreboardObjective, value?: number; gotten?: boolean; }>> = {};
 	constructor(root: World) {
