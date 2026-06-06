@@ -58,6 +58,7 @@ cachedValue: ${cachedType === DynamicPropertyTypes.JSON ? "View in View" : targe
 					break;
 				}
 			}
+			return;
 		}
 		const numberValue = Number(value);
 		if (Number.isFinite(numberValue)) {
