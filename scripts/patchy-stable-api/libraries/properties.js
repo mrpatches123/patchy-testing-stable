@@ -82,6 +82,12 @@ class DynamicPropertyManager {
             return;
         setFunction(key, value);
     }
+    getCachedType(key) {
+        return this.dynamicProperties[key]?.type;
+    }
+    getCachedValue(key) {
+        return this.dynamicProperties[key]?.value;
+    }
     setString(key, value) {
         this.setInternal(key, value ?? undefined, {
             getFunction: this.getString.bind(this),
@@ -393,7 +399,7 @@ class DynamicPropertyManager {
         });
     }
 }
-class EntityStorageManager extends DynamicPropertyManager {
+export class EntityStorageManager extends DynamicPropertyManager {
     setScore(key, value) {
         if (typeof key !== 'string')
             throw new Error('key is not of type string');
@@ -474,7 +480,7 @@ class EntityStorageManager extends DynamicPropertyManager {
         });
     }
 }
-class WorldStorageManager extends DynamicPropertyManager {
+export class WorldStorageManager extends DynamicPropertyManager {
     root;
     scoresStorage = {};
     constructor(root) {

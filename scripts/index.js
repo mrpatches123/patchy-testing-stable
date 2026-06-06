@@ -2,8 +2,9 @@ import { BlockPermutation, Player, system, world } from "@minecraft/server";
 import { ActionForm, MessageForm, ModalForm } from "./patchy-stable-api/libraries/form";
 import { MinecraftBlockTypes, MinecraftItemTypes } from "./patchy-stable-api/libraries/vanilla-data";
 import { storage } from "./patchy-stable-api/libraries/properties";
-import { getBlockArrayAsync, overworld } from "patchy-stable-api/libraries/utilities";
-import { customEvents } from "patchy-stable-api/libraries/events";
+import { getBlockArrayAsync, overworld } from "./patchy-stable-api/libraries/utilities";
+import { customEvents } from "./patchy-stable-api/libraries/events";
+import './patchy-stable-api/imports';
 // const pigIterate = new Iterate(() => overworld.getEntities({ type: MinecraftEntityTypes.Pig }));
 // system.runInterval(() => {
 // 	console.warn("Interval");

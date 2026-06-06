@@ -85,6 +85,12 @@ class DynamicPropertyManager {
 		if (cancelSet) return;
 		setFunction(key, value);
 	}
+	getCachedType(key: string) {
+		return this.dynamicProperties[key]?.type;
+	}
+	getCachedValue(key: string) {
+		return this.dynamicProperties[key]?.value;
+	}
 	setString(key: string, value?: string) {
 		this.setInternal(key, value ?? undefined, {
 			getFunction: this.getString.bind(this),

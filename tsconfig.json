@@ -1,7 +1,6 @@
 {
 	"compilerOptions": {
 		"target": "es2023",
-		"moduleResolution": "node",
 		"module": "es2022",
 		"declaration": true,
 		"noLib": false,
@@ -18,7 +17,6 @@
 		"noImplicitUseStrict": false,
 		"outDir": "scripts/",
 		"rootDir": "src/",
-		"baseUrl": "src/",
 		"listFiles": false,
 		"noEmitHelpers": true,
 		"removeComments": false,

@@ -23,6 +23,8 @@ declare class DynamicPropertyManager {
     protected root: Player | Entity | World;
     constructor(root: Player | Entity | World);
     private setInternal;
+    getCachedType(key: string): DynamicPropertyTypes | undefined;
+    getCachedValue(key: string): any;
     setString(key: string, value?: string): void;
     getString(key: string): string | undefined;
     setJSON(key: string, value?: any): void;
@@ -49,7 +51,7 @@ declare class DynamicPropertyManager {
     get booleans(): Record<string, boolean | undefined>;
     get vector3s(): Record<string, Vector3 | undefined>;
 }
-declare class EntityStorageManager extends DynamicPropertyManager {
+export declare class EntityStorageManager extends DynamicPropertyManager {
     setScore(key: string, value?: number): boolean | void;
     getScore(key: string): number | undefined;
     clearAllScores(): void;
@@ -64,7 +66,7 @@ declare class EntityStorageManager extends DynamicPropertyManager {
     }>;
     get scores(): Record<string, number | undefined>;
 }
-declare class WorldStorageManager extends DynamicPropertyManager {
+export declare class WorldStorageManager extends DynamicPropertyManager {
     protected root: World;
     protected scoresStorage: Record<string, Record<string, {
         objective?: ScoreboardObjective;

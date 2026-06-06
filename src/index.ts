@@ -2,10 +2,11 @@ import { BlockPermutation, EntityInventoryComponent, ItemStack, Player, system, 
 import { ActionForm, MessageForm, ModalForm } from "./patchy-stable-api/libraries/form";
 import { MinecraftBlockTypes, MinecraftEntityTypes, MinecraftItemTypes } from "./patchy-stable-api/libraries/vanilla-data";
 import { storage } from "./patchy-stable-api/libraries/properties";
-import { getBlockArrayAsync, overworld } from "patchy-stable-api/libraries/utilities";
-import { customEvents } from "patchy-stable-api/libraries/events";
-import { Iterate } from "patchy-stable-api/libraries/iterate";
-import { Timer } from "patchy-stable-api/libraries/time";
+import { getBlockArrayAsync, overworld } from "./patchy-stable-api/libraries/utilities";
+import { customEvents } from "./patchy-stable-api/libraries/events";
+import { Iterate } from "./patchy-stable-api/libraries/iterate";
+import { Timer } from "./patchy-stable-api/libraries/time";
+import './patchy-stable-api/imports';
 // const pigIterate = new Iterate(() => overworld.getEntities({ type: MinecraftEntityTypes.Pig }));
 // system.runInterval(() => {
 // 	console.warn("Interval");
