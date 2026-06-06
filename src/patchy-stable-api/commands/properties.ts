@@ -3,7 +3,7 @@ import { COMMAND_PREFIX } from "../../command_prefix.js";
 import { Command } from "../libraries/command";
 import { ActionForm, ModalForm } from "../libraries/form";
 import { DynamicPropertyTypes, EntityStorageManager, storage, WorldStorageManager } from "../libraries/properties";
-import { isVector3 } from "../libraries/utilities";
+import { isDefined, isVector3 } from "../libraries/utilities";
 function getViewPropertyValueForm(player: Player, target: Player | Entity | World = world, targetStorage: EntityStorageManager | WorldStorageManager = target instanceof World ? storage.get(target) : storage.get(target), dynamicPropertyId: string) {
 	if (!target || (target instanceof Entity && !target.isValid)) return;
 	const form = new ActionForm().title(`Edit ${dynamicPropertyId}`);
@@ -34,7 +34,8 @@ cachedValue: ${cachedType === DynamicPropertyTypes.JSON ? "View in View" : targe
 		getPropertyEditViewMenuForm(player, target, targetStorage, dynamicPropertyId)?.show(player);
 	});
 	form.textField("Enter Value:", "").callback((player, newValue) => {
-		if (newValue === "") {
+		if (!isDefined(newValue) || newValue === "") {
+
 			switch (cachedType) {
 				case DynamicPropertyTypes.Boolean: {
 					targetStorage.removeBoolean(dynamicPropertyId);
