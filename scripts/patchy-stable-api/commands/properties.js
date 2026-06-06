@@ -9,10 +9,10 @@ function getViewPropertyValueForm(player, target = world, targetStorage = target
         return;
     const form = new ActionForm().title(`Edit ${dynamicPropertyId}`);
     const value = target.getDynamicProperty(dynamicPropertyId);
-    const cachedType = targetStorage.getCachedType("dynamicPropertyId") ?? "NotCached";
+    const cachedType = targetStorage.getCachedType("dynamicPropertyId");
     form.label(`${dynamicPropertyId}: 
 value: ${(isVector3(value) || cachedType === DynamicPropertyTypes.JSON) ? JSON.stringify(value) : value}
-cachedType: ${cachedType}
+cachedType: ${cachedType ?? "NotCached"}
 cachedValue: ${(isVector3(value) || cachedType === DynamicPropertyTypes.JSON) ? JSON.stringify(value) : targetStorage.getCachedValue(dynamicPropertyId)}`);
     form.button("back").callback(() => {
         getPropertyEditForm(player, target, targetStorage, dynamicPropertyId)?.show(player);
@@ -27,10 +27,10 @@ function getPropertyEditForm(player, target = world, targetStorage = target inst
         return;
     const form = new ModalForm().title(`Edit ${dynamicPropertyId}`);
     const value = target.getDynamicProperty(dynamicPropertyId);
-    const cachedType = targetStorage.getCachedType("dynamicPropertyId") ?? "NotCached";
+    const cachedType = targetStorage.getCachedType("dynamicPropertyId");
     form.label(`${dynamicPropertyId}: 
 value: ${cachedType === DynamicPropertyTypes.JSON ? "View in View" : isVector3(value) ? JSON.stringify(value) : value}
-cachedType: ${cachedType}
+cachedType: ${cachedType ?? "NotCached"}
 cachedValue: ${cachedType === DynamicPropertyTypes.JSON ? "View in View" : targetStorage.getCachedValue(dynamicPropertyId)}`);
     form.closeCallback(() => {
         getPropertyEditViewMenuForm(player, target, targetStorage, dynamicPropertyId)?.show(player);
@@ -87,10 +87,10 @@ function getPropertyEditViewMenuForm(player, target = world, targetStorage = tar
         return;
     const form = new ActionForm().title(`Edit or View Menu ${dynamicPropertyId}`);
     const value = target.getDynamicProperty(dynamicPropertyId);
-    const cachedType = targetStorage.getCachedType("dynamicPropertyId") ?? "NotCached";
+    const cachedType = targetStorage.getCachedType("dynamicPropertyId");
     form.label(`${dynamicPropertyId}: 
 value: ${cachedType === DynamicPropertyTypes.JSON ? "View in View" : isVector3(value) ? JSON.stringify(value) : value}
-cachedType: ${cachedType}
+cachedType: ${cachedType ?? "NotCached"}
 cachedValue: ${cachedType === DynamicPropertyTypes.JSON ? "View in View" : targetStorage.getCachedValue(dynamicPropertyId)}`);
     form.button("Edit").callback(() => {
         getPropertyEditForm(player, target, targetStorage, dynamicPropertyId)?.show(player);
@@ -107,10 +107,10 @@ function getPropertiesForm(player, target = world) {
     const targetStorage = target instanceof World ? storage.get(target) : storage.get(target);
     target.getDynamicPropertyIds().forEach((dynamicPropertyId) => {
         const value = target.getDynamicProperty(dynamicPropertyId);
-        const cachedType = targetStorage.getCachedType("dynamicPropertyId") ?? "NotCached";
+        const cachedType = targetStorage.getCachedType("dynamicPropertyId");
         form.label(`${dynamicPropertyId}: 
 value: ${cachedType === DynamicPropertyTypes.JSON ? "View in EDIT" : isVector3(value) ? JSON.stringify(value) : value}
-cachedType: ${cachedType}
+cachedType: ${cachedType ?? "NotCached"}
 cachedValue: ${cachedType === DynamicPropertyTypes.JSON ? "View in EDIT" : targetStorage.getCachedValue(dynamicPropertyId)}`);
         form.button("edit").callback(() => {
             getPropertyEditViewMenuForm(player, target, targetStorage, dynamicPropertyId)?.show(player);
