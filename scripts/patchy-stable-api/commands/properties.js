@@ -38,33 +38,36 @@ cachedValue: ${cachedType === DynamicPropertyTypes.JSON ? "View in View" : targe
     form.textField("Enter Value:", "").callback((player, newValue) => {
         if (!isDefined(newValue) || newValue === "") {
             if (!cachedType)
-                return target.setDynamicProperty(dynamicPropertyId);
-            switch (cachedType) {
-                case DynamicPropertyTypes.Boolean: {
-                    targetStorage.removeBoolean(dynamicPropertyId);
-                    break;
+                target.setDynamicProperty(dynamicPropertyId);
+            else
+                switch (cachedType) {
+                    case DynamicPropertyTypes.Boolean: {
+                        targetStorage.removeBoolean(dynamicPropertyId);
+                        break;
+                    }
+                    case DynamicPropertyTypes.JSON: {
+                        targetStorage.removeJSON(dynamicPropertyId);
+                        break;
+                    }
+                    case DynamicPropertyTypes.Number: {
+                        targetStorage.removeNumber(dynamicPropertyId);
+                        break;
+                    }
+                    case DynamicPropertyTypes.Vector3: {
+                        targetStorage.removeVector3(dynamicPropertyId);
+                        break;
+                    }
+                    case DynamicPropertyTypes.String: {
+                        targetStorage.removeString(dynamicPropertyId);
+                        break;
+                    }
                 }
-                case DynamicPropertyTypes.JSON: {
-                    targetStorage.removeJSON(dynamicPropertyId);
-                    break;
-                }
-                case DynamicPropertyTypes.Number: {
-                    targetStorage.removeNumber(dynamicPropertyId);
-                    break;
-                }
-                case DynamicPropertyTypes.Vector3: {
-                    targetStorage.removeVector3(dynamicPropertyId);
-                    break;
-                }
-                case DynamicPropertyTypes.String: {
-                    targetStorage.removeString(dynamicPropertyId);
-                    break;
-                }
-            }
+            player.sendMessage(`removed ${dynamicPropertyId}`);
             return;
         }
         const numberValue = Number(value);
         if (Number.isFinite(numberValue)) {
+            player.sendMessage(`set ${dynamicPropertyId} to ${numberValue}`);
             return targetStorage.setNumber(dynamicPropertyId, numberValue);
         }
         let jsonValue;
@@ -73,11 +76,14 @@ cachedValue: ${cachedType === DynamicPropertyTypes.JSON ? "View in View" : targe
         }
         catch { }
         if (jsonValue && isVector3(jsonValue)) {
+            player.sendMessage(`set ${dynamicPropertyId} to ${newValue}`);
             return targetStorage.setVector3(dynamicPropertyId, jsonValue);
         }
         if (jsonValue && jsonValue instanceof Object) {
+            player.sendMessage(`set ${dynamicPropertyId} to ${newValue}`);
             return targetStorage.setJSON(jsonValue);
         }
+        player.sendMessage(`set ${dynamicPropertyId} to ${newValue}`);
         targetStorage.setString(jsonValue);
     });
     return form;

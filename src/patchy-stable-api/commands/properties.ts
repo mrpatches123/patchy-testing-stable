@@ -35,8 +35,8 @@ cachedValue: ${cachedType === DynamicPropertyTypes.JSON ? "View in View" : targe
 	});
 	form.textField("Enter Value:", "").callback((player, newValue) => {
 		if (!isDefined(newValue) || newValue === "") {
-			if (!cachedType) return target.setDynamicProperty(dynamicPropertyId);
-			switch (cachedType) {
+			if (!cachedType) target.setDynamicProperty(dynamicPropertyId);
+			else switch (cachedType) {
 				case DynamicPropertyTypes.Boolean: {
 					targetStorage.removeBoolean(dynamicPropertyId);
 					break;
@@ -58,10 +58,12 @@ cachedValue: ${cachedType === DynamicPropertyTypes.JSON ? "View in View" : targe
 					break;
 				}
 			}
+			player.sendMessage(`removed ${dynamicPropertyId}`);
 			return;
 		}
 		const numberValue = Number(value);
 		if (Number.isFinite(numberValue)) {
+			player.sendMessage(`set ${dynamicPropertyId} to ${numberValue}`);
 			return targetStorage.setNumber(dynamicPropertyId, numberValue);
 		}
 		let jsonValue: any;
@@ -70,13 +72,18 @@ cachedValue: ${cachedType === DynamicPropertyTypes.JSON ? "View in View" : targe
 		} catch { }
 
 		if (jsonValue && isVector3(jsonValue)) {
+			player.sendMessage(`set ${dynamicPropertyId} to ${newValue}`);
+
 			return targetStorage.setVector3(dynamicPropertyId, jsonValue);
 		}
 
 		if (jsonValue && jsonValue instanceof Object) {
+			player.sendMessage(`set ${dynamicPropertyId} to ${newValue}`);
 			return targetStorage.setJSON(jsonValue);
 		}
+		player.sendMessage(`set ${dynamicPropertyId} to ${newValue}`);
 		targetStorage.setString(jsonValue);
+
 	});
 	return form;
 }
