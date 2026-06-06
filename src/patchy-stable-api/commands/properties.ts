@@ -39,18 +39,23 @@ cachedValue: ${cachedType === DynamicPropertyTypes.JSON ? "View in View" : targe
 			switch (cachedType) {
 				case DynamicPropertyTypes.Boolean: {
 					targetStorage.removeBoolean(dynamicPropertyId);
+					break;
 				}
 				case DynamicPropertyTypes.JSON: {
 					targetStorage.removeJSON(dynamicPropertyId);
+					break;
 				}
 				case DynamicPropertyTypes.Number: {
 					targetStorage.removeNumber(dynamicPropertyId);
+					break;
 				}
 				case DynamicPropertyTypes.Vector3: {
 					targetStorage.removeVector3(dynamicPropertyId);
+					break;
 				}
 				case DynamicPropertyTypes.String: {
 					targetStorage.removeString(dynamicPropertyId);
+					break;
 				}
 			}
 		}
