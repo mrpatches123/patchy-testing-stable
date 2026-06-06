@@ -35,7 +35,7 @@ cachedValue: ${cachedType === DynamicPropertyTypes.JSON ? "View in View" : targe
 	});
 	form.textField("Enter Value:", "").callback((player, newValue) => {
 		if (!isDefined(newValue) || newValue === "") {
-
+			if (!cachedType) return target.setDynamicProperty(dynamicPropertyId);
 			switch (cachedType) {
 				case DynamicPropertyTypes.Boolean: {
 					targetStorage.removeBoolean(dynamicPropertyId);
