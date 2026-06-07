@@ -1,5 +1,5 @@
 import { CommandPermissionLevel, CustomCommandParamType, Entity, Player, system, world, World } from "@minecraft/server";
-import { COMMAND_PREFIX } from "../../command_prefix.js";
+import { PACK_PREFIX } from "../../pack_prefix.js";
 import { Command } from "../libraries/command";
 import { ActionForm, ModalForm } from "../libraries/form";
 import { DynamicPropertyTypes, EntityStorageManager, storage, WorldStorageManager } from "../libraries/properties";
@@ -125,7 +125,7 @@ cachedValue: ${cachedType === DynamicPropertyTypes.JSON ? "View in EDIT" : targe
 	return form;
 }
 Command.registerCommand({
-	name: `${COMMAND_PREFIX}properties`,
+	name: `${PACK_PREFIX}properties`,
 	description: "Manages dynamic properties via UI",
 	permissionLevel: CommandPermissionLevel.Admin,
 	optionalParameters: [{ type: CustomCommandParamType.EntitySelector, name: "target" }]
