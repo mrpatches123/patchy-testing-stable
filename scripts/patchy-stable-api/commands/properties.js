@@ -122,6 +122,9 @@ cachedValue: ${cachedType === DynamicPropertyTypes.JSON ? "View in EDIT" : targe
             getPropertyEditViewMenuForm(player, target, targetStorage, dynamicPropertyId)?.show(player);
         });
     });
+    form.button("Clear All").callback(() => {
+        targetStorage.clearAllDynamicProperties();
+    });
     return form;
 }
 Command.registerCommand({
