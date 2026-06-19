@@ -7,6 +7,7 @@ import { customEvents } from "./patchy-stable-api/libraries/events";
 import { Iterate } from "./patchy-stable-api/libraries/iterate";
 import { Timer } from "./patchy-stable-api/libraries/time";
 import './patchy-stable-api/imports';
+import "./tests/imports.js";
 // const pigIterate = new Iterate(() => overworld.getEntities({ type: MinecraftEntityTypes.Pig }));
 // system.runInterval(() => {
 // 	console.warn("Interval");

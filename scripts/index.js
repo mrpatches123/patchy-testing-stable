@@ -5,6 +5,7 @@ import { storage } from "./patchy-stable-api/libraries/properties";
 import { getBlockArrayAsync, overworld } from "./patchy-stable-api/libraries/utilities";
 import { customEvents } from "./patchy-stable-api/libraries/events";
 import './patchy-stable-api/imports';
+import "./tests/imports.js";
 // const pigIterate = new Iterate(() => overworld.getEntities({ type: MinecraftEntityTypes.Pig }));
 // system.runInterval(() => {
 // 	console.warn("Interval");

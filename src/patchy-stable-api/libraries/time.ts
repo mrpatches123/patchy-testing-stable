@@ -102,12 +102,14 @@ export class Timer {
 				[`${key}:keepTime`]: keepTime
 			}
 		} = entityStorage;
-		if (!isDefined(timerTime) || !countDirection || !isDefined(startTime) || !isDefined(loadId) || !isDefined(startDate)) return;
+		// console.warn({ timerTime: timerTime ?? "null", countDirection: countDirection ?? "null", startTime: startTime ?? "null", loadId: loadId ?? "null", startDate: startDate ?? "null" });
+		if (!isDefined(timerTime) || !countDirection || countDirection === CountDirection.Down && !isDefined(startTime) || !isDefined(loadId) || !isDefined(startDate)) return;
 		const timer = new Timer();
 
 		if (startTime && countDirection === CountDirection.Down) timer.setCountDown(startTime);
 		timer.setCurrentTime(timerTime, true);
 		if ((keepTime !== undefined && keepTime) || loadId === currentLoadId) timer.startDate = startDate;
+		// console.warn({ timerstartDate: timer.startDate, startDate });
 		return timer;
 	}
 	saveToEntity(entity: Entity, key: string, keepTime = false) {

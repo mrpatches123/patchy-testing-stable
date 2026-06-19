@@ -1,0 +1,1 @@
+import "./plugins/timer_test.js";
