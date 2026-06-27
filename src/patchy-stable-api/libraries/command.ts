@@ -129,6 +129,7 @@ system.beforeEvents.startup.subscribe((event) => {
 	Command.enums = {};
 });
 /*
+const array = ["test", "value2"] as const;
 // 'a' typed as: Entity[]
 // 'b' typed as: "test" | "value2"
 // 'c' typed as: string | undefined
@@ -137,13 +138,13 @@ Command.registerCommand({
 	name: "test",
 	description: "test",
 	permissionLevel: CommandPermissionLevel.Admin,
-	mandatoryParameters: [{ name: "test", type: CustomCommandParamType.EntitySelector }, { name: "test", type: CustomCommandParamType.Enum, enumValues: ["test", "value2"] }] as const, // as const very important,
+	mandatoryParameters: [{ name: "test", type: CustomCommandParamType.EntitySelector }, { name: "test", type: CustomCommandParamType.Enum, enumValues: array }] as const, // as const very important,
 	optionalParameters: [{ name: "test", type: CustomCommandParamType.String }, { name: "test", type: CustomCommandParamType.Enum, enumValues: ["vale1", "vale2", "value2", "22"] }] as const
 
 }, (origin, a, b, c, d) => {
 	// console.warn(a); // Optional: Read 'a' to clear the unused variable warning
 });
-*/
+
 
 Command.registerCommand({
 	name: "test",
@@ -152,3 +153,4 @@ Command.registerCommand({
 }, (origin) => {
 	// console.warn(a); // Optional: Read 'a' to clear the unused variable warning
 });
+*/
