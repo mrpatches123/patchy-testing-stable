@@ -354,4 +354,7 @@ export class Vector {
 	static equals(a: Vector3, b: Vector3) {
 		return a.x === b.x && a.y === b.y && a.z === b.z;
 	}
+	static fromVector3(vector: Vector3) {
+		return new Vector(vector.x, vector.y, vector.z);
+	}
 }
