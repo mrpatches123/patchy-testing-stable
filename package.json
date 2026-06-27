@@ -2,7 +2,7 @@
 	"type": "module",
 	"dependencies": {
 		"@minecraft/server": "^2.4.0",
-		"@minecraft/server-ui": "^2.0.0",
+		"@minecraft/server-ui": "^2.1.0",
 		"@minecraft/vanilla-data": "^1.21.131",
 		"fs": "^0.0.1-security",
 		"my-plugin": "file:./src/patchy-stable-api/typscript_lang/",
