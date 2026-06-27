@@ -159,18 +159,46 @@ export class Vector {
 	}
 	/**
 	 * @remarks
+	 * Returns the cross product of these two vectors.
+	 * @param {Vector3} a
+	 * @param {Vector3 | number} b
+	 * @returns {number}
+	 */
+	static dot(a: Vector3, b: Vector3 | number): number {
+		return typeof b === "number" ? a.x * b + a.y * b + a.z * b : a.x * b.x + a.y * b.y + a.z * b.z;
+	}
+	/**
+	 * @remarks
 	 * Returns the distance between two vectors.
 	 * @param {Vector3} a
 	 * @param {Vector3} b
 	 * @returns {number}
 	 */
 	static distance(a: Vector3, b: Vector3): number {
-		const dx = b.x - a.x;
-		const dy = b.y - a.y;
-		const dz = b.z - a.z;
-		const distance = Math.hypot(dx, dy, dz);
+		return Vector.euclideanDistance(a, b);
+	}
+	/**
+	 * @remarks
+	 * Returns the distance between two vectors.
+	 * @param {Vector3} a
+	 * @param {Vector3} b
+	 * @returns {number}
+	 */
+	static euclideanDistance(a: Vector3, b: Vector3): number {
 
-		return distance;
+		return Vector.subtract(a, b).length();
+	}
+	/**
+	 * @remarks
+	 * Returns the same vector with absolute components or all positive components.
+	 * @param {Vector3} a
+	 * @returns {Vector}
+	 */
+	static absoluteComponents(a: Vector3) {
+		return new Vector(Math.abs(a.x), Math.abs(a.y), Math.abs(a.z));
+	}
+	static manhattanDistance(a: Vector3, b: Vector3) {
+		return Vector.dot(Vector.absoluteComponents(Vector.subtract(a, b)), 1);
 	}
 	/**
 	 * @remarks
