@@ -28,7 +28,7 @@ world.afterEvents.worldLoad.subscribe(() => {
 	worldLoaded = true;
 });
 const consoleWarn = console.warn;
-const argsReformat = (consoleFunction, args) => {
+const argsReformat = (consoleFunction: typeof consoleWarn, args: any[]) => {
 	let shouldTrace;
 	let shouldReformat = true;
 	let logType = "any";
@@ -79,7 +79,7 @@ const logTypes = ["none", "specific", "any"];
  * @param {Player} receiver 
  * @returns 
  */
-export async function showConsoleForm(receiver) {
+export async function showConsoleForm(receiver: Player) {
 	const worldStorage = storage.get();
 	const shouldTrace = worldStorage.getBoolean("shouldTrace");
 	worldStorage.booleans.shouldReformat ??= true;
