@@ -2,6 +2,7 @@ import { CommandPermissionLevel, Player, system, world } from "@minecraft/server
 import { ModalForm } from "./libraries/form";
 import { storage } from "./libraries/properties";
 import { Command } from "./libraries/command";
+import { PACK_PREFIX } from "../pack_prefix";
 
 
 export function jsonifyMap(map: Map<any, any>) {
@@ -107,7 +108,7 @@ export async function showConsoleForm(receiver: Player) {
 }
 Command.registerCommand({
 	description: "shows console settings form",
-	name: "apotheosis:console",
+	name: `${PACK_PREFIX}console`,
 	permissionLevel: CommandPermissionLevel.Admin
 }, (origin) => {
 	const { sourceEntity } = origin;
