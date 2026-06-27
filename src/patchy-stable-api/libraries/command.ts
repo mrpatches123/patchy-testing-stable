@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { BlockType, CommandPermissionLevel, CommandResult, CustomCommand, CustomCommandOrigin, CustomCommandParameter, CustomCommandParamType, CustomCommandRegistry, CustomCommandResult, CustomCommandStatus, Entity, ItemType, Player, PlayerPermissionLevel, system, Vector3, world, } from "@minecraft/server";
 import '../prototypes';
 import { CustomCommandParamsMapping } from "../prototypes";

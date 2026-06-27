@@ -4,12 +4,14 @@ import { storage } from "./libraries/properties";
 import { Command } from "./libraries/command";
 
 export function jsonifyMap(map: Map<any, any>) {
-	const object = {};
+	const object: Record<string, any> = {};
 	map.forEach((value, key) => {
+		const keyString = <string | undefined>key?.toString() ?? "null";
 		if (value instanceof Map) {
-			return object[key] = jsonifyMap(value);
+			return object[keyString] = jsonifyMap(value);
 		}
-		object[key] = value;
+		object[keyString] = value;
+		return undefined;
 	});
 	return object;
 }
