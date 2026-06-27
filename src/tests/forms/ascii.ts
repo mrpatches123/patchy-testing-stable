@@ -1,7 +1,8 @@
 import { CustomForm, ObservableString } from "@minecraft/server-ui";
-import { Command } from "../../patchy-stable-api/libraries/command";
+
 import { PACK_PREFIX } from "../../pack_prefix";
 import { CommandPermissionLevel, Player, system } from "@minecraft/server";
+import { Command } from "../../patchy-stable-api/libraries/command";
 
 function createAndShowForm(player: Player) {
 	const title = new ObservableString(" ", { clientWritable: true });
