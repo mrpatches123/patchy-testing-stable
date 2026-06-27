@@ -3,6 +3,7 @@ import { ModalForm } from "./libraries/form";
 import { storage } from "./libraries/properties";
 import { Command } from "./libraries/command";
 
+
 export function jsonifyMap(map: Map<any, any>) {
 	const object: Record<string, any> = {};
 	map.forEach((value, key) => {
@@ -104,10 +105,12 @@ export async function showConsoleForm(receiver: Player) {
 			if (logType === "specific") worldStorage.setString("logSpecificKey", `${data}`);
 		}).showAwaitNotBusy(receiver);
 }
-system.beforeEvents.startup.subscribe((event) => {
-	Command.registerCommand({ description: "shows console settings form", name: "apotheosis:console", permissionLevel: CommandPermissionLevel.Admin }, (origin) => {
-		const { sourceEntity } = origin;
-		if (!(sourceEntity instanceof Player)) return;
-		system.runTimeout(() => showConsoleForm(sourceEntity), 2);
-	});
+Command.registerCommand({
+	description: "shows console settings form",
+	name: "apotheosis:console",
+	permissionLevel: CommandPermissionLevel.Admin
+}, (origin) => {
+	const { sourceEntity } = origin;
+	if (!(sourceEntity instanceof Player)) return;
+	system.runTimeout(() => showConsoleForm(sourceEntity), 2);
 });

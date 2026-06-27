@@ -1,9 +1,10 @@
 import { CommandPermissionLevel, CustomCommandParamType, Entity, Player, system, world, World } from "@minecraft/server";
 import { PACK_PREFIX } from "../../pack_prefix.js";
-import { Command } from "../libraries/command";
+
 import { ActionForm, ModalForm } from "../libraries/form";
 import { DynamicPropertyTypes, EntityStorageManager, storage, WorldStorageManager } from "../libraries/properties";
 import { isDefined, isVector3 } from "../libraries/utilities";
+import { Command } from "../libraries/command.js";
 function getViewPropertyValueForm(player: Player, target: Player | Entity | World = world, targetStorage: EntityStorageManager | WorldStorageManager = target instanceof World ? storage.get(target) : storage.get(target), dynamicPropertyId: string) {
 	if (!target || (target instanceof Entity && !target.isValid)) return;
 	const form = new ActionForm().title(`Edit ${dynamicPropertyId}`);
@@ -128,10 +129,12 @@ Command.registerCommand({
 	name: `${PACK_PREFIX}properties`,
 	description: "Manages dynamic properties via UI",
 	permissionLevel: CommandPermissionLevel.Admin,
-	optionalParameters: [{ type: CustomCommandParamType.EntitySelector, name: "target" }]
-}, async ({ sourceEntity: player }, entity) => {
+	optionalParameters: [{ type: CustomCommandParamType.EntitySelector, name: "target" }] as const
+}, async ({ sourceEntity: player }, entities) => {
 	if (!(player instanceof Player)) return;
+	const entity = entities?.[0] ?? player;
 	await system.waitTicks(0);
-	getPropertiesForm(player, (entity as ((Entity | undefined)[] | undefined))?.[0])?.showAwaitNotBusy(player);
+	if (!entity || !entity.isValid) return;
+	getPropertiesForm(player, entity)?.showAwaitNotBusy(player);
 
 });
