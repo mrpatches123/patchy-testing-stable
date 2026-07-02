@@ -44,8 +44,8 @@ export class TimerDoneEvent {
 let loaded = false;
 worldInitialize.subscribe(() => {
 	const worldStorage = storage.get();
-	worldStorage.numbers.loadId ??= Number.MIN_SAFE_INTEGER;
-	worldStorage.numbers.loadId++;
+	const loadId = worldStorage.getNumber("loadId") ?? Number.MIN_SAFE_INTEGER;
+	worldStorage.setNumber("loadId", loadId);
 	loaded = true;
 });
 export class Timer {
@@ -111,7 +111,7 @@ export class Timer {
 		// 	}
 		// } = entityStorage;
 		// console.warn({ timerTime: timerTime ?? "null", countDirection: countDirection ?? "null", startTime: startTime ?? "null", loadId: loadId ?? "null", startDate: startDate ?? "null" });
-		if (!MiscUtilities.isDefined(timerTime) || !countDirection || countDirection === CountDirection.Down && !MiscUtilities.isDefined(startTime) || !MiscUtilities.isDefined(loadId) || !isDefined(startDate)) return;
+		if (!MiscUtilities.isDefined(timerTime) || !countDirection || countDirection === CountDirection.Down && !MiscUtilities.isDefined(startTime) || !MiscUtilities.isDefined(loadId) || !MiscUtilities.isDefined(startDate)) return;
 		const timer = new Timer();
 
 		if (startTime && countDirection === CountDirection.Down) timer.setCountDown(startTime);
