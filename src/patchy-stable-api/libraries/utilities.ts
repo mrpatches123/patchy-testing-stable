@@ -43,7 +43,7 @@ try {
 } catch (e) { }
 export function fixPlayerScore(player: Player) {
 	if (!player.scoreboardIdentity)
-		player.runCommand('scoreboard players set @s test 0');
+		player.runCommand('scoreboard players set @s testkjjkfkejwkjf 0');
 }
 export function iterateObject<T extends Record<string, any>>(obj: T, callback: (key: keyof T, value: T[keyof T], i: number) => void) {
 	return MiscUtilities.iterateObject(obj, callback);

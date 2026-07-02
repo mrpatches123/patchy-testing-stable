@@ -1,4 +1,4 @@
-import { Block, Dimension, DimensionTypes, Entity, EntityQueryOptions, ItemStack, system, Vector3, world } from "@minecraft/server";
+import { Block, Dimension, DimensionTypes, Entity, EntityQueryOptions, ItemStack, Player, system, Vector3, world } from "@minecraft/server";
 import { Vector } from "../vector";
 import { worldInitialize } from "../events/world_initialize";
 import { MiscUtilities } from "./misc";
@@ -8,6 +8,10 @@ export class WorldSystemUtilities {
 	static nether: Dimension;
 	static end: Dimension;
 	static dimensions: Dimension[];
+	static fixPlayerScore(player: Player) {
+		if (!player.scoreboardIdentity)
+			player.runCommand('scoreboard players set @s testkjjkfkejwkjf 0');
+	}
 	static init() {
 		worldInitialize.subscribe(() => {
 			WorldSystemUtilities.overworld = world.getDimension("overworld");

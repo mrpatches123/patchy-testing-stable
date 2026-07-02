@@ -1,6 +1,10 @@
 import { Player, system, world } from "@minecraft/server";
-import { fixPlayerScore, iterateObject } from "../utilities";
 import { worldInitialize } from "./world_initialize";
+import { WorldSystemUtilities } from "../utilities/world_system";
+import { MiscUtilities } from "../utilities/misc";
+/**
+ * Runs on /reload and when a player joins
+ */
 export class PlayerJoinedEvent {
 	protected currentSubscribeId = 0;
 	protected subscriptions: Record<number, ((data: { player: Player; }) => void)> = {};
@@ -29,9 +33,9 @@ export class PlayerJoinedEvent {
 	}
 	runEvent(player: Player) {
 		if (player.id in this.loads) return;
-		fixPlayerScore(player);
+		WorldSystemUtilities.fixPlayerScore(player);
 		this.loads[player.id] = true;
-		iterateObject(this.subscriptions, (id, callback) => callback({ player }));
+		MiscUtilities.iterateObject(this.subscriptions, (id, callback) => callback({ player }));
 	}
 	unsubscribeSystem() {
 		if (!this.runId) return;
