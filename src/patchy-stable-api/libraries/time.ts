@@ -61,12 +61,12 @@ export class Timer {
 		const loadId = Timer.getLoadId();
 		if (!loadId) return false;
 		const entityStorage = storage.get(entity);
-		entityStorage.numbers[`${key}:timerTime`] = undefined;
-		entityStorage.numbers[`${key}:startTime`] = undefined;
-		entityStorage.numbers[`${key}:startDate`] = undefined;
-		entityStorage.numbers[`${key}:loadId`] = undefined;
-		entityStorage.strings[`${key}:countDirection`] = undefined;
-		entityStorage.booleans[`${key}:keepTime`] = undefined;
+		entityStorage.setNumber(`${key}:timerTime`, undefined);
+		entityStorage.setNumber(`${key}:startTime`, undefined);
+		entityStorage.setNumber(`${key}:startDate`, undefined);
+		entityStorage.setNumber(`${key}:loadId`, undefined);
+		entityStorage.setString(`${key}:countDirection`, undefined);
+		entityStorage.setBoolean(`${key}:keepTime`, undefined);
 	}
 	static getFromItemStack(itemStack: ItemStack, key: string) {
 		const currentLoadId = Timer.getLoadId();
@@ -89,19 +89,25 @@ export class Timer {
 		const currentLoadId = Timer.getLoadId();
 		if (!loaded) return false;
 		const entityStorage = storage.get(entity);
-		const {
-			strings: {
-				[`${key}:countDirection`]: countDirection },
-			numbers: {
-				[`${key}:timerTime`]: timerTime,
-				[`${key}:startTime`]: startTime,
-				[`${key}:loadId`]: loadId,
-				[`${key}:startDate`]: startDate
-			},
-			booleans: {
-				[`${key}:keepTime`]: keepTime
-			}
-		} = entityStorage;
+		const countDirection = entityStorage.getString(`${key}:countDirection`);
+		const timerTime = entityStorage.getNumber(`${key}:timerTime`);
+		const startTime = entityStorage.getNumber(`${key}:startTime`);
+		const loadId = entityStorage.getNumber(`${key}:loadId`);
+		const startDate = entityStorage.getNumber(`${key}:startDate`);
+		const keepTime = entityStorage.getBoolean(`${key}:keepTime`);
+		// const {
+		// 	strings: {
+		// 		[`${key}:countDirection`]: countDirection },
+		// 	numbers: {
+		// 		[`${key}:timerTime`]: timerTime,
+		// 		[`${key}:startTime`]: startTime,
+		// 		[`${key}:loadId`]: loadId,
+		// 		[`${key}:startDate`]: startDate
+		// 	},
+		// 	booleans: {
+		// 		[`${key}:keepTime`]: keepTime
+		// 	}
+		// } = entityStorage;
 		// console.warn({ timerTime: timerTime ?? "null", countDirection: countDirection ?? "null", startTime: startTime ?? "null", loadId: loadId ?? "null", startDate: startDate ?? "null" });
 		if (!isDefined(timerTime) || !countDirection || countDirection === CountDirection.Down && !isDefined(startTime) || !isDefined(loadId) || !isDefined(startDate)) return;
 		const timer = new Timer();
@@ -116,10 +122,10 @@ export class Timer {
 		const loadId = Timer.getLoadId();
 		if (!loadId) return false;
 		const entityStorage = storage.get(entity);
-		entityStorage.numbers[`${key}:timerTime`] = new Date().getTime() - this.startDate;
-		entityStorage.numbers[`${key}:startTime`] = this.startTime;
-		entityStorage.numbers[`${key}:startDate`] = this.startDate;
-		entityStorage.numbers[`${key}:loadId`] = loadId;
+		entityStorage.setNumber(`${key}:timerTime`, new Date().getTime() - this.startDate);
+		entityStorage.setNumber(`${key}:startTime`, this.startTime);
+		entityStorage.setNumber(`${key}:startDate`, this.startDate);
+		entityStorage.setNumber(`${key}:loadId`, loadId);
 		entityStorage.strings[`${key}:countDirection`] = this.countDirection;
 		entityStorage.booleans[`${key}:keepTime`] = keepTime;
 		return true;
@@ -133,6 +139,7 @@ export class Timer {
 		itemStack.setDynamicProperty(`${key}:loadId`, loadId);
 		itemStack.setDynamicProperty(`${key}:countDirection`, this.countDirection);
 		itemStack.setDynamicProperty(`${key}:keepTime`, keepTime);
+		return true;
 	}
 	getTime() {
 		if (this.countDirection === CountDirection.Down) {
