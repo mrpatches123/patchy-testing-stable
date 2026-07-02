@@ -56,7 +56,7 @@ export function isVector3(value: any): value is Vector3 {
 	return MiscUtilities.isVector3(value);
 }
 export function chunkString(str: string, length: number) {
-	StringUtilities.chunkString(str, length);
+	return StringUtilities.chunkString(str, length);
 }
 
 export const facingDirectionToVector3: Record<number, Vector3> = {
@@ -68,7 +68,7 @@ export const facingDirectionToVector3: Record<number, Vector3> = {
 	5: { x: -1, y: 0, z: 0 },
 };
 export function parseCommand(message: string, prefix: string) {
-	StringUtilities.parseCommand(message, prefix);
+	return StringUtilities.parseCommand(message, prefix);
 }
 
 
