@@ -1,6 +1,10 @@
 import { world, Player, Vector3, system, ItemStack, EntityInventoryComponent, Dimension, Entity, EntityQueryOptions, Block, PlayerLeaveBeforeEventSignal, DimensionTypes } from "@minecraft/server";
 import { Vector } from "./vector";
 import { ActionFormData, ActionFormResponse, FormCancelationReason, MessageFormData, MessageFormResponse, ModalFormData, ModalFormResponse } from "@minecraft/server-ui";
+import { StringUtilities } from "./utilities/string";
+import { WorldSystemUtilities } from "./utilities/world_system";
+import { MiscUtilities } from "./utilities/misc";
+import { MathUtilities } from "./utilities/math";
 
 export let overworld: Dimension;
 export let nether: Dimension;
@@ -23,16 +27,16 @@ export const content = {
 	}
 };
 export function toSnakeCase(str: string) {
-	return str.replace(/^[A-Z]/, (s) => s.toLowerCase()).replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`).replace(/[^A-Za-z0-9]+/g, "_");
+	return StringUtilities.toSnakeCase(str);
 }
 export function toProperCaseTypeId(typeId: string) {
-	return toProperCase(typeId?.replace(/\w+:/, ""));
+	return StringUtilities.toProperCaseTypeId(typeId);
 }
 export function toProperCase(string: string) {
-	return string?.replace(/[_.]/g, ' ')?.replace(/\w\S*/g, (txt) => txt.charAt(0)?.toUpperCase() + txt?.substr(1)?.toLowerCase());
+	return StringUtilities.toProperCase(string);
 }
 export function toCamelCase(str: string) {
-	return str.replace(/(?:^\w|[A-Z]|(\b|_)\w)/g, (word, index) => word.toUpperCase()).replace(/[\s_]+/g, '').replace(/\w/, (world) => world.toLowerCase());
+	return StringUtilities.toCamelCase(str);
 }
 try {
 	world.scoreboard.addObjective("test");
@@ -42,27 +46,17 @@ export function fixPlayerScore(player: Player) {
 		player.runCommand('scoreboard players set @s test 0');
 }
 export function iterateObject<T extends Record<string, any>>(obj: T, callback: (key: keyof T, value: T[keyof T], i: number) => void) {
-	let i = 0;
-	const objectPrototype = Object.getPrototypeOf({});
-	for (const key in obj) {
-		if (key in objectPrototype) continue;
-		callback(key, obj[key], i++);
-	}
+	return MiscUtilities.iterateObject(obj, callback);
 }
 
 export function isDefined<T>(value: T | undefined | null): value is T {
-	return value !== undefined && value !== null && typeof value !== 'number' || Number.isFinite(value);
+	return MiscUtilities.isDefined(value);
 }
 export function isVector3(value: any): value is Vector3 {
-	return typeof value.x === 'number' && typeof value.y === 'number' && typeof value.z === 'number';
+	return MiscUtilities.isVector3(value);
 }
 export function chunkString(str: string, length: number) {
-	let size = (str.length / length) | 0;
-	const array: string[] = Array(++size);
-	for (let i = 0, offset = 0; i < size; i++, offset += length) {
-		array[i] = str.substr(offset, length);
-	}
-	return array;
+	StringUtilities.chunkString(str, length);
 }
 
 export const facingDirectionToVector3: Record<number, Vector3> = {
@@ -74,160 +68,16 @@ export const facingDirectionToVector3: Record<number, Vector3> = {
 	5: { x: -1, y: 0, z: 0 },
 };
 export function parseCommand(message: string, prefix: string) {
-	const messageLength = message.length;
-	let finding: boolean | string = false;
-	let braceCount = [0, 0], bracketCount = [0, 0], quoteCount = 0, spaceCount = 0;
-	let started = false;
-	let o = 0;
-	const output: string[] = [];
-	for (let i = prefix.length; i < messageLength; i++) {
-		const char = message[i];
-		switch (char) {
-			case '{':
-				switch (finding) {
-					case 'json':
-						break;
-					default:
-						braceCount = [0, 0], bracketCount = [0, 0], quoteCount = 0, spaceCount = 0, finding = false;
-						output.push('');
-						o++;
-						finding = 'json';
-						break;
-
-				}
-				output[o] += char;
-				braceCount[0]++;
-				break;
-			case '}':
-				output[o] += char;
-				if (braceCount[0] !== ++braceCount[1] || bracketCount[0] !== bracketCount[1] || (quoteCount && quoteCount & 1)) break;
-				braceCount = [0, 0], bracketCount = [0, 0], quoteCount = 0, spaceCount = 0, finding = false;
-				break;
-			case ']':
-				output[o] += char;
-				if (bracketCount[0] !== ++bracketCount[1] || braceCount[0] !== braceCount[1] || (quoteCount && quoteCount & 1)) break;
-				braceCount = [0, 0], bracketCount = [0, 0], quoteCount = 0, spaceCount = 0, finding = false;
-				break;
-			case '"':
-				switch (finding) {
-					case 'json':
-						output[o] += char;
-						break;
-					default:
-						braceCount = [0, 0], bracketCount = [0, 0], quoteCount = 0, spaceCount = 0, finding = false;
-						finding = 'string';
-					case 'string':
-						if (!(++quoteCount & 1)) { finding = false; break; };
-						if (!output[o].length) break;
-						output.push('');
-						o++;
-						break;
-				}
-				break;
-			case '[':
-				switch (finding) {
-					case 'json':
-						break;
-					default:
-						output.push('');
-						o++;
-						finding = 'json';
-						break;
-
-				}
-				output[o] += char;
-				bracketCount[0]++;
-				break;
-			case ' ':
-				switch (finding) {
-					case 'string':
-					case 'json':
-						if (!(quoteCount & 1)) break;
-						output[o] += char;
-						break;
-					default:
-						const nextChar = message?.[i + 1];
-						switch (nextChar) {
-							case ' ':
-							case '[':
-							case '{':
-							case '"':
-								break;
-							default:
-								output.push('');
-								o++;
-								finding = 'word';
-								break;
-						}
-						break;
-				}
-				break;
-			default:
-				if (!started) {
-					started = true;
-					finding = 'word';
-					output.push('');
-					spaceCount = 1;
-				}
-				switch (char) {
-					case '@':
-						if (finding === 'string') {
-							output[o] += char;
-							break;
-						}
-						const nextChar = message?.[i + 1];
-						switch (nextChar) {
-							case '"':
-								break;
-							default:
-								const afterNextChar = message?.[i + 2];
-								switch (afterNextChar) {
-									case ' ':
-										finding = 'string';
-										output[o] += char;
-										break;
-									case '[':
-										finding = 'json';
-										output[o] += char;
-										break;
-
-								}
-								break;
-						}
-						break;
-					default:
-						output[o] += char;
-						break;
-				}
-
-				break;
-		}
-	}
-	return output;
+	StringUtilities.parseCommand(message, prefix);
 }
 
 
 export function cartesianToCircular(vector: Vector3, center: Vector3 = { x: 0, y: 0, z: 0 }) {
-	const { x, z } = vector;
-	const { x: xc, z: zc } = center;
-	const xd = x - xc;
-	const zd = z - zc;
-	const r = Math.sqrt((xd) ** 2 + (zd) ** 2);
-	let thetaT;
-	if (zd >= 0) {
-		thetaT = Math.atan2(zd, xd);
-	} else {
-		thetaT = 2 * Math.PI + Math.atan2(zd, xd);
-	}
-	return ({ theta: thetaT, r, x, z });
+	return MathUtilities.cartesianToCircular(vector, center);
 }
 const PI2 = 2 * Math.PI;
 export function differenceRadians(theta1: number, theta2: number) {
-	const t1 = theta1 % (PI2);
-	const t2 = theta2 % (PI2);
-	let r1 = t1 - t2;
-	let r2 = t1 - (t2 + PI2);
-	return (Math.abs(r1) > Math.abs(r2)) ? r2 : r1;
+	return MathUtilities.differenceRadians(theta1, theta2);
 
 }
 export function shuffle<T>(array: T[]): T[] {
@@ -263,343 +113,26 @@ export function sendMessageMessageToOtherPlayers(excludePlayers: Player[], messa
  * Entity may not be loaded once 
  */
 export async function spawnEntityAsync(dimension: Dimension, typeId: string, location: Vector3, callback?: (entity: Entity) => void | Promise<void>, tickingArea: boolean = true): Promise<Entity> {
-	let entity: Entity | undefined;
-	try {
+	return WorldSystemUtilities.spawnEntityAsync(dimension, typeId, location, callback, tickingArea);
 
-		try {
-			entity = dimension.spawnEntity(typeId, location);
-		} catch (error: any) {
-			console.warn('ingore', error, error.stack);
-		}
-		let tickAreaCreated = false;
-		entity = ((entity && entity.isValid) ? entity : await new Promise(async (resolve) => {
-			let tickingAreaRemoved = false;
-			try {
-				const commandResult = dimension.runCommand(`tickingarea remove spawnEntityAsyncTick`);
-				tickingAreaRemoved = Boolean(commandResult.successCount);
-			} catch { }
-			if (tickingAreaRemoved) await sleep(1);
-			const { x, y, z } = location;
-			if (tickingArea) {
-				tickAreaCreated = true;
-				await dimension.runCommand(`tickingarea add ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} spawnEntityAsyncTick`);
-			}
-			const cancelRun = systemRunIntervalAwaitCallback(async () => {
-				try {
-					entity = (!entity) ? dimension.spawnEntity(typeId, location) : entity;
-					if (!entity) return;
-					if (!entity.isValid) return;
-					cancelRun();
-
-					resolve(entity);
-				} catch (error: any) {
-					console.warn('ingore', error, error.stack);
-				}
-			});
-		}))!;
-
-		await callback?.(entity);
-		if (tickAreaCreated) dimension.runCommand(`tickingarea remove spawnEntityAsyncTick`);
-
-	} catch (error: any) {
-		console.warn('ingore', error, error.stack);
-	}
-	return entity!;
 }
 /**
  * Entity may not be loaded once 
  */
 export async function spawnItemAsync(dimension: Dimension, itemStack: ItemStack, location: Vector3, callback?: (entity: Entity) => void | Promise<void>, tickingArea: boolean = true): Promise<Entity> {
-	let entity: Entity | undefined;
-	try {
-		try {
-			entity = dimension.spawnItem(itemStack, location);
-		} catch (error: any) {
-			console.warn('ingore', error, error.stack);
-		}
-		let tickAreaCreated = false;
-		entity = ((entity && entity.isValid) ? entity : await new Promise(async (resolve) => {
-			let tickingAreaRemoved = false;
-			try {
-				const commandResult = dimension.runCommand(`tickingarea remove spawnItemAsyncTick`);
-				tickingAreaRemoved = Boolean(commandResult.successCount);
-			} catch { }
-			if (tickingAreaRemoved) await sleep(1);
-			const { x, y, z } = location;
-			if (tickingArea) {
-				tickAreaCreated = true;
-				await dimension.runCommand(`tickingarea add ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} spawnItemAsyncTick`);
-			}
-			const cancelRun = systemRunIntervalAwaitCallback(async () => {
-				try {
-					entity = (!entity) ? dimension.spawnItem(itemStack, location) : entity;
-					if (!entity) return;
-					if (!entity.isValid) return;
-					cancelRun();
-
-					resolve(entity);
-				} catch (error: any) {
-					console.warn('ingore', error, error.stack);
-				}
-			});
-		}))!;
-
-		await callback?.(entity);
-		if (tickAreaCreated) dimension.runCommand(`tickingarea remove spawnItemAsyncTick`);
-
-	} catch (error: any) {
-		console.warn('ingore', error, error.stack);
-	}
-	return entity!;
+	return WorldSystemUtilities.spawnItemAsync(dimension, itemStack, location, callback, tickingArea);
 }
 export async function getEntityAsync(dimension: Dimension, entityQueryOptions: EntityQueryOptions, callback?: (entity: Entity | undefined) => void | Promise<void>, timeoutTicks = Infinity, tickingArea: boolean = true): Promise<Entity | undefined> {
-	let entity: Entity | undefined;
-	try {
-		if (!entityQueryOptions.location) throw new Error('location is required');
-		entityQueryOptions.closest = 1;
-		const { x, y, z } = entityQueryOptions.location;
-
-		try {
-			entity = dimension.getEntities(entityQueryOptions)[0];
-		} catch (error: any) {
-			console.warn('ingore', error, error.stack);
-		}
-		let tickAreaCreated = false;
-		let i = 0;
-		entity = ((entity && entity.isValid) ? entity : await new Promise(async (resolve) => {
-			let tickingAreaRemoved = false;
-			try {
-				const commandResult = dimension.runCommand(`tickingarea remove getEntityAsyncTick`);
-				tickingAreaRemoved = Boolean(commandResult.successCount);
-			} catch { }
-			if (tickingAreaRemoved) await sleep(1);
-			if (tickingArea) {
-				tickAreaCreated = true;
-				await dimension.runCommand(`tickingarea add ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} ${Math.floor(x)} ${Math.floor(y)} ${Math.floor(z)} getEntityAsyncTick`);
-			}
-			const cancelRun = systemRunIntervalAwaitCallback(async () => {
-				if (i++ > timeoutTicks) {
-					cancelRun();
-					resolve(entity);
-				}
-				try {
-					entity = (!entity || !entity.isValid) ? dimension.getEntities(entityQueryOptions)[0] : entity;
-					if (!entity) return;
-					if (!entity.isValid) return;
-					cancelRun();
-
-					resolve(entity);
-				} catch (error: any) {
-					console.warn('ingore', error, error.stack);
-				}
-			});
-		}))!;
-
-		await callback?.(entity);
-		if (tickAreaCreated) dimension.runCommand(`tickingarea remove getEntityAsyncTick`);
-
-	} catch (error: any) {
-		console.warn('ingore', error, error.stack);
-	}
-	return entity;
+	return WorldSystemUtilities.getEntityAsync(dimension, entityQueryOptions, callback, timeoutTicks, tickingArea);
 }
 export async function getBlockArrayAsync(dimension: Dimension, blockLocations: Vector3[], callback?: (blocks: Block[]) => void | Promise<void>, tickingArea: boolean = true): Promise<Block[]> {
-	try {
-		let locations = [Vector.minVectors(blockLocations).toVector3(), Vector.maxVectors(blockLocations).toVector3()];
-		let blocks: (Block | undefined)[] = Array(blockLocations.length);
-		let tickingAreaCreated = false;
-		async function createTickingArea() {
-			if (!tickingArea || tickingAreaCreated) return;
-			let tickingAreaRemoved = false;
-			try {
-				const commandResult = dimension.runCommand(`tickingarea remove getBlockAsyncTick`);
-				tickingAreaRemoved = Boolean(commandResult.successCount);
-			} catch { }
-			if (tickingAreaRemoved) await sleep(1);
-			tickingAreaCreated = true;
-			await dimension.runCommand(`tickingarea add ${Math.floor(locations[0].x)} ${Math.floor(locations[0].y)} ${Math.floor(locations[0].z)} ${Math.floor(locations[1].x)} ${Math.floor(locations[1].y)} ${Math.floor(locations[1].z)} getBlockAsyncTick`);
-		}
-		async function removeTickingArea() {
-			if (!tickingAreaCreated) return;
-			await dimension.runCommand(`tickingarea remove getBlockAsyncTick`);
-		}
-		for (let i = 0; i < blockLocations.length; i++) {
-			let location = blockLocations[i];
-			let block: Block | undefined;
-			try {
-				try {
-					block = dimension.getBlock(location);
-				} catch (error: any) {
-					console.warn('ingore', error, error.stack);
-				}
-				block = ((block && block.isValid) ? block : await new Promise(async (resolve) => {
-					try {
-						await createTickingArea();
-						const cancelRun = systemRunIntervalAwaitCallback(async () => {
-							try {
-								block = (!block) ? dimension.getBlock(location) : block;
-								if (!block) return;
-								if (!block.isValid) return;
-								cancelRun();
-
-								resolve(block);
-							} catch (error: any) {
-								console.warn('ingore', error, error.stack);
-							}
-						});
-					} catch (error: any) {
-						console.warn('ingore', error, error.stack);
-					}
-				}))!;
-				blocks[i] = block;
-			} catch (error: any) {
-				console.warn('ingore', error, error.stack);
-			}
-
-		}
-		callback?.(blocks as Block[]);
-		await removeTickingArea();
-
-		return (blocks as Block[])!;
-	} catch (error: any) {
-		console.warn('ingore', error, error.stack);
-	}
-	return [];
+	return WorldSystemUtilities.getBlockArrayAsync(dimension, blockLocations, callback, tickingArea);
 }
 export async function spawnEntityArrayAsync(dimension: Dimension, entitySpawnData: { typeId: string, location: Vector3; }[], callback?: (blocks: Entity[]) => void | Promise<void>, tickingArea: boolean = true): Promise<Entity[]> {
-	try {
-		const locationsArray = entitySpawnData.map(({ location }) => location);
-		let locations = [Vector.minVectors(locationsArray).toVector3(), Vector.maxVectors(locationsArray).toVector3()];
-		let entities: (Entity | undefined)[] = Array(entitySpawnData.length);
-		let tickingAreaCreated = false;
-		async function createTickingArea() {
-			if (!tickingArea || tickingAreaCreated) return;
-			let tickingAreaRemoved = false;
-			try {
-				const commandResult = dimension.runCommand(`tickingarea remove getBlockAsyncTick`);
-				tickingAreaRemoved = Boolean(commandResult.successCount);
-			} catch { }
-			if (tickingAreaRemoved) await sleep(1);
-			tickingAreaCreated = true;
-			await dimension.runCommand(`tickingarea add ${Math.floor(locations[0].x)} ${Math.floor(locations[0].y)} ${Math.floor(locations[0].z)} ${Math.floor(locations[1].x)} ${Math.floor(locations[1].y)} ${Math.floor(locations[1].z)} getBlockAsyncTick`);
-		}
-		async function removeTickingArea() {
-			if (!tickingAreaCreated) return;
-			await dimension.runCommand(`tickingarea remove getBlockAsyncTick`);
-		}
-		for (let i = 0; i < entitySpawnData.length; i++) {
-			let { location, typeId } = entitySpawnData[i];
-			let entity: Entity | undefined;
-			try {
-				try {
-					entity = dimension.spawnEntity(typeId, location);
-				} catch (error: any) {
-					console.warn('ingore', error, error.stack);
-				}
-				entity = ((entity && entity.isValid) ? entity : await new Promise(async (resolve) => {
-					try {
-						await createTickingArea();
-						const cancelRun = systemRunIntervalAwaitCallback(async () => {
-							try {
-								entity = (!entity) ? dimension.spawnEntity(typeId, location) : entity;
-								if (!entity) return;
-								if (!entity.isValid) return;
-								cancelRun();
-
-								resolve(entity);
-							} catch (error: any) {
-								console.warn('ingore', error, error.stack);
-							}
-						});
-					} catch (error: any) {
-						console.warn('ingore', error, error.stack);
-					}
-				}))!;
-				entities[i] = entity;
-			} catch (error: any) {
-				console.warn('ingore', error, error.stack);
-			}
-
-		}
-		callback?.(entities as Entity[]);
-		await removeTickingArea();
-
-		return (entities as Entity[])!;
-	} catch (error: any) {
-		console.warn('ingore', error, error.stack);
-	}
-	return [];
+	return WorldSystemUtilities.spawnEntityArrayAsync(dimension, entitySpawnData, callback, tickingArea);
 }
 export async function getBlocksAsync(dimension: Dimension, blockLocations: Vector3 | [Vector3, Vector3], callback?: (blocks: Block[]) => void | Promise<void>, tickingArea: boolean = true): Promise<Block[]> {
-	try {
-		let locations: [Vector3, Vector3];
-		if (isVector3(blockLocations)) locations = [blockLocations, blockLocations];
-		else {
-			locations = [Vector.min(blockLocations[0], blockLocations[1]).toVector3(), Vector.max(blockLocations[0], blockLocations[1]).toVector3()];
-		}
-		let blocks: (Block | undefined)[] = Array(Vector.areaBetweenFloored(locations[0], locations[1]));
-		let tickingAreaCreated = false;
-		async function createTickingArea() {
-			if (!tickingArea || tickingAreaCreated) return;
-			console.warn('createdTickingArea');
-			let tickingAreaRemoved = false;
-			try {
-				const commandResult = dimension.runCommand(`tickingarea remove getBlockAsyncTick`);
-				tickingAreaRemoved = Boolean(commandResult.successCount);
-			} catch { }
-			if (tickingAreaRemoved) await sleep(1);
-			tickingAreaCreated = true;
-			await dimension.runCommand(`tickingarea add ${Math.floor(locations[0].x)} ${Math.floor(locations[0].y)} ${Math.floor(locations[0].z)} ${Math.floor(locations[1].x)} ${Math.floor(locations[1].y)} ${Math.floor(locations[1].z)} getBlockAsyncTick`);
-		}
-		async function removeTickingArea() {
-			if (!tickingAreaCreated) return;
-			await dimension.runCommand(`tickingarea remove getBlockAsyncTick`);
-		}
-		for (let i = 0, x = locations[0].x; x <= locations[1].x; x++) {
-			for (let y = locations[0].y; y <= locations[1].y; y++) {
-				for (let z = locations[0].z; z <= locations[1].z; z++, i++) {
-					let block: Block | undefined;
-					const location = { x, y, z };
-					try {
-						try {
-							block = dimension.getBlock(location);
-						} catch (error: any) {
-							console.warn('ingore', error, error.stack);
-						}
-						block = ((block && block.isValid) ? block : await new Promise(async (resolve) => {
-							try {
-								await createTickingArea();
-								const cancelRun = systemRunIntervalAwaitCallback(async () => {
-									try {
-										block = (!block) ? dimension.getBlock(location) : block;
-										if (!block) return;
-										if (!block.isValid) return;
-										cancelRun();
-
-										resolve(block);
-									} catch (error: any) {
-										console.warn('ingore', error, error.stack);
-									}
-								});
-							} catch (error: any) {
-								console.warn('ingore', error, error.stack);
-							}
-						}))!;
-						blocks[i++] = block;
-					} catch (error: any) {
-						console.warn('ingore', error, error.stack);
-					}
-				}
-			}
-		}
-		callback?.(blocks as Block[]);
-		await removeTickingArea();
-
-		return (blocks as Block[])!;
-	} catch (error: any) {
-		console.warn('ingore', error, error.stack);
-	}
-	return [];
+	return WorldSystemUtilities.getBlocksAsync(dimension, blockLocations, callback, tickingArea);
 }
 
 /**
@@ -608,24 +141,8 @@ export async function getBlocksAsync(dimension: Dimension, blockLocations: Vecto
  * @returns {() => void} cancel() run to cancel
  */
 export function systemRunIntervalAwaitCallback(callback: () => void | Promise<void>, tickDelay = 0): () => void {
-	let stop = false;
-	let currentId: number | undefined;
-	const run = async () => {
-		if (stop) return;
-		// try {
-		await callback();
-		if (stop) return;
-		currentId = system.runTimeout(run, tickDelay);
-		// } catch (error: any) {
-		// 	console.warn("Error below stack: ", error.stack);
-		// 	throw error;
-		// }
-	};
-	currentId = system.run(run);
-	return () => {
-		stop = true;
-		if (isDefined(currentId)) system.clearRun(currentId);
-	};
+	return WorldSystemUtilities.systemRunIntervalAwaitCallback(callback, tickDelay);
+
 }
 
 /**
@@ -633,8 +150,8 @@ export function systemRunIntervalAwaitCallback(callback: () => void | Promise<vo
  * @param {number} ticks 
  * @returns {Promise<undefined>}
  */
-export async function sleep(ticks?: number): Promise<undefined> {
-	return new Promise((resolve) => system.runTimeout(() => resolve(undefined), ticks));
+export async function sleep(ticks: number = 0): Promise<void> {
+	return await system.waitTicks(ticks);
 }
 /**
  * @type {Record<string, boolean>}
