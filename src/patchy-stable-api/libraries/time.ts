@@ -1,7 +1,8 @@
 import { Entity, ItemStack, system } from "@minecraft/server";
 import { storage } from "./properties";
-import { customEvents } from "./events";
-import { isDefined } from "./utilities";
+import { worldInitialize } from "./events/world_initialize";
+import { MiscUtilities } from "./utilities/misc";
+
 
 enum CountDirection {
 	Up = "Up",
@@ -41,7 +42,7 @@ export class TimerDoneEvent {
 	}
 }
 let loaded = false;
-customEvents.worldInitialize.subscribe(() => {
+worldInitialize.subscribe(() => {
 	const worldStorage = storage.get();
 	worldStorage.numbers.loadId ??= Number.MIN_SAFE_INTEGER;
 	worldStorage.numbers.loadId++;
@@ -67,6 +68,7 @@ export class Timer {
 		entityStorage.setNumber(`${key}:loadId`, undefined);
 		entityStorage.setString(`${key}:countDirection`, undefined);
 		entityStorage.setBoolean(`${key}:keepTime`, undefined);
+		return true;
 	}
 	static getFromItemStack(itemStack: ItemStack, key: string) {
 		const currentLoadId = Timer.getLoadId();
@@ -77,7 +79,7 @@ export class Timer {
 		const loadId = <number | undefined>itemStack.getDynamicProperty(`${key}:loadId`);
 		const startDate = <number | undefined>itemStack.getDynamicProperty(`${key}:startDate`);
 		const keepTime = <boolean | undefined>itemStack.getDynamicProperty(`${key}:keepTime`);
-		if (!isDefined(timerTime) || !countDirection || !isDefined(startTime) || !isDefined(loadId) || !isDefined(startDate)) return;
+		if (!MiscUtilities.isDefined(timerTime) || !countDirection || !MiscUtilities.isDefined(startTime) || !MiscUtilities.isDefined(loadId) || !MiscUtilities.isDefined(startDate)) return;
 		const timer = new Timer();
 
 		if (startTime && countDirection === CountDirection.Down) timer.setCountDown(startTime);
@@ -109,7 +111,7 @@ export class Timer {
 		// 	}
 		// } = entityStorage;
 		// console.warn({ timerTime: timerTime ?? "null", countDirection: countDirection ?? "null", startTime: startTime ?? "null", loadId: loadId ?? "null", startDate: startDate ?? "null" });
-		if (!isDefined(timerTime) || !countDirection || countDirection === CountDirection.Down && !isDefined(startTime) || !isDefined(loadId) || !isDefined(startDate)) return;
+		if (!MiscUtilities.isDefined(timerTime) || !countDirection || countDirection === CountDirection.Down && !MiscUtilities.isDefined(startTime) || !MiscUtilities.isDefined(loadId) || !isDefined(startDate)) return;
 		const timer = new Timer();
 
 		if (startTime && countDirection === CountDirection.Down) timer.setCountDown(startTime);

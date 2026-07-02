@@ -1,4 +1,4 @@
-import { Player, system, world } from "@minecraft/server";
+import { Entity, Player, system, world } from "@minecraft/server";
 import { worldInitialize } from "./world_initialize";
 import { WorldSystemUtilities } from "../utilities/world_system";
 import { MiscUtilities } from "../utilities/misc";
@@ -50,3 +50,5 @@ export class PlayerJoinedEvent {
 	}
 }
 export const playerJoined = new PlayerJoinedEvent();
+
+
