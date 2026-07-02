@@ -1,5 +1,6 @@
 import { system, world } from "@minecraft/server";
-import { iterateObject } from "../utilities";
+import { MiscUtilities } from "../utilities/misc";
+
 export class WorldInitializeEvent {
 	protected currentSubscribeId = 0;
 	protected subscriptions: Record<number, (() => void)> = {};
@@ -22,7 +23,7 @@ export class WorldInitializeEvent {
 				const { successCount } = await player.runCommand("testfor @s");
 				if (!successCount) return;
 				// console.warn('world_initialised');
-				iterateObject(thisWorldInit.subscriptions, (id, callback) => callback());
+				MiscUtilities.iterateObject(thisWorldInit.subscriptions, (id, callback) => callback());
 				system.clearRun(thisWorldInit.runId!);
 			} catch (error: any) {
 				console.warn(error, error.stack);
